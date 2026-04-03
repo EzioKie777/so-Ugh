@@ -5,81 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeoGuard</title>
     <style>
-    body, html {
-    height: 100%;
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-}
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
 
-.login-container {
-    /* Full screen background image */
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
-                url('background1.jpeg'); 
-    background-size: cover;
-    background-position: center;
-    height: 100vh;
-    display: flex;
-    justify-content: center; /* Centers horizontally */
-    align-items: center;     /* Centers vertically */
-}
+        .login-container {
+            /* Full screen background image */
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                        url('background1.jpeg'); 
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center; 
+            align-items: center;     
+        }
 
-.login-card {
-    background: white;
-    display: flex; /* Puts illustration and form side-by-side */
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    max-width: 800px;
-    width: 90%;
-}
+        .login-card {
+            background: white;
+            display: flex; 
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            max-width: 800px;
+            width: 90%;
+        }
 
-.card-right {
-    padding: 40px;
-    background-color: #f4f4f4;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+        /* This ensures the left side takes up half the card */
+        .card-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+        }
 
-input {
-    margin: 10px 0;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+        .card-right {
+            flex: 1;
+            padding: 40px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-.sign-in-btn {
-    background-color: #8b4513; /* That brown color from your image */
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
-}
-<style>
+        input {
+            margin: 10px 0;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-</head>
+        .sign-in-btn {
+            background-color: #8b4513; 
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style> </head>
 <body>
 
     <div class="login-container">
-    <div class="login-card">
-        <div class="card-left">
-    <img src="illustration.png" alt="Tagbilaran Heritage Building" style="width: 100%; height: auto;">
-        </div>
-        <div class="card-right">
-            <h2>Tagbi GeoGuard</h2>
-            <p>Hazard Reporting Platform</p>
-            <input type="text" placeholder="Heritage ID / Email Address">
-            <input type="password" placeholder="Password">
-            <button class="sign-in-btn">SIGN IN</button>
-            <div class="footer-links">
-                <a href="#">Create an Account</a>
+        <div class="login-card">
+            <div class="card-left">
+                <img src="Illustration.png" alt="Tagbilaran Heritage Building" style="width: 100%; height: auto;">
+            </div>
+            <div class="card-right">
+                <h2>Tagbi GeoGuard</h2>
+                <p>Hazard Reporting Platform</p>
+                <input type="text" placeholder="Heritage ID / Email Address">
+                <input type="password" placeholder="Password">
+                <button class="sign-in-btn">SIGN IN</button>
+                <div class="footer-links">
+                    <a href="#">Create an Account</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
 </html>
