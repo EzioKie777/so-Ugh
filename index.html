@@ -5,74 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Engineering Portfolio</title>
     <style>
-    /* This targets the whole page */
-    body {
-        background-color: #0f172a; /* Dark navy blue */
-        color: #e2e8f0;            /* Soft white text */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-    }
+    body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
 
-    /* Styling the header */
-    header {
-        text-align: center;
-        padding: 40px 0;
-        border-bottom: 2px solid #38bdf8; /* Bright blue line */
-        margin-bottom: 30px;
-    }
+.login-container {
+    /* Full screen background image */
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                url('your-background-image.jpg'); 
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;     /* Centers vertically */
+}
 
-    h1 {
-        color: #38bdf8;
-        margin: 0;
-    }
+.login-card {
+    background: white;
+    display: flex; /* Puts illustration and form side-by-side */
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    max-width: 800px;
+    width: 90%;
+}
 
-    /* Styling the sections */
-    section {
-        background: #1e293b;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
+.card-right {
+    padding: 40px;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
-    h2 {
-        color: #fbbf24; /* Amber color for headings */
-        border-left: 5px solid #fbbf24;
-        padding-left: 10px;
-    }
+input {
+    margin: 10px 0;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 
-    ul {
-        list-style-type: square;
-    }
-</style>
+.sign-in-btn {
+    background-color: #8b4513; /* That brown color from your image */
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+<style>
+
 </head>
 <body>
 
-    <header>
-        <h1>Welcome to My Web Space</h1>
-        <p>Computer Engineering Student | Developer | Maker</p>
-    </header>
-
-    <main>
-        <section id="about">
-            <h2>About Me</h2>
-            <p>I enjoy building things with code and hardware.</p>
-        </section>
-
-        <section id="projects">
-            <h2>Current Projects</h2>
-            <ul>
-                <li><strong>Gpad:</strong> A smart-surface gesture mouse pad.</li>
-                <li><strong>Robotic Boat:</strong> A 3D-printed boat using ATtiny85.</li>
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>Created in 2026</p>
-    </footer>
+    <div class="login-container">
+    <div class="login-card">
+        <div class="card-left">
+            <img src="https://via.placeholder.com/300x400" alt="Heritage Building Illustration">
+        </div>
+        <div class="card-right">
+            <h2>Tagbi GeoGuard</h2>
+            <p>Hazard Reporting Platform</p>
+            <input type="text" placeholder="Heritage ID / Email Address">
+            <input type="password" placeholder="Password">
+            <button class="sign-in-btn">SIGN IN</button>
+            <div class="footer-links">
+                <a href="#">Create an Account</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
