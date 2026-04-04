@@ -66,6 +66,34 @@
             cursor: pointer;
             font-weight: bold;
             margin-top: 10px;
+
+            /* Styling for the new header container */
+            .card-header {
+             display: flex;         /* Puts logo and text side-by-side */
+    align-items: center;  /* Vertically centers them */
+    margin-bottom: 30px;  /* Space below the header */
+}
+
+/* Specific styling for the shield logo */
+.header-logo {
+    width: 60px;          /* Adjust size as needed */
+    height: auto;
+    margin-right: 15px;  /* Space between logo and text */
+}
+
+/* Text alignment within the header */
+.header-text-block h2 {
+    margin: 0;
+    font-size: 24px;      /* Adjust size as needed */
+    line-height: 1.2;
+}
+
+.header-text-block p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    color: #666;          /* Subtler color for the subtitle */
+}
+
         }
     </style> </head>
 <body>
@@ -76,15 +104,21 @@
                 <img src="Illustration.png" alt="Tagbilaran Heritage Building" style="width: 100%; height: auto;">
             </div>
             <div class="card-right">
+            <div class="card-header">
+                 <img src="shield_logo.png" alt="GeoGuard Shield Logo" class="header-logo">
+            <div class="header-text-block">
                 <h2>Tagbi GeoGuard</h2>
                 <p>Hazard Reporting Platform</p>
+        </div>
+        </div>
                 <input type="text" placeholder="Heritage ID / Email Address">
                 <input type="password" placeholder="Password">
                 <button class="sign-in-btn">SIGN IN</button>
-                <div class="footer-links">
-                    <a href="#">Create an Account</a>
-                </div>
-            </div>
+            <div class="footer-links">
+                <a href="#">Create an Account</a>
+        </div>
+        </div>
+
         </div>
     </div>
 
