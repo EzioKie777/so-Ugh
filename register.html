@@ -121,14 +121,13 @@
         </div>
     </div>
 
-    <input type="text" placeholder="Full Name">
-    <input type="email" placeholder="Email Address">
-    <input type="text" placeholder="Heritage ID (Optional)">
-    <input type="password" placeholder="Create Password">
-    <input type="password" placeholder="Confirm Password">
-    
-    <button class="sign-in-btn">REGISTER</button>
-    
+<form id="registerForm">
+    <input type="text" id="fullName" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email Address" required>
+    <input type="password" id="password" placeholder="Create Password" required>
+    <button type="submit" class="sign-in-btn">REGISTER</button>
+</form>
+
     <div class="footer-links">
         <p>Already have an account? <a href="index.html">Sign In</a></p>
     </div>
