@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoGuard</title>
+    <style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .login-container {
+        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                    url('background1.jpeg'); 
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center; 
+        align-items: center;     
+    }
+
+    .login-card {
+        background: white;
+        display: flex; 
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        max-width: 900px; /* Slightly wider to fit the new header */
+        width: 90%;
+    }
+
+    .card-left {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+    }
+
+    .card-right {
+        flex: 1;
+        padding: 40px;
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* --- NEW HEADER SECTION (Outside the button!) --- */
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .header-logo {
+        width: 50px; /* Try 70px for a clear but balanced look */
+        height: auto;
+        margin-bottom: 15px;
+    }
+
+    .header-text-block h2 {
+        margin: 0;
+        font-size: 22px;
+        color: #2c3e50;
+    }
+
+    .header-text-block p {
+        margin: 0;
+        font-size: 13px;
+        color: #7f8c8d;
+    }
+    /* ----------------------------------------------- */
+
+    input {
+        margin: 10px 0;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .sign-in-btn {
+        background-color: #8b4513; 
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .footer-links {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .footer-links a {
+        font-size: 13px;
+        color: #8b4513;
+        text-decoration: none;
+    }
+</style> 
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="card-left">
+                <img src="Illustration.png" alt="Heritage Building Photo" style="width: 100%; height: auto;">
+            </div>
+            
+<div class="card-right">
+    <div class="card-header">
+        <img src="shield_logo.png" alt="GeoGuard Shield Logo" class="header-logo">
+        <div class="header-text-block">
+            <h2>Join GeoGuard</h2>
+            <p>Help protect Tagbilaran's Heritage</p>
+        </div>
+    </div>
+
+    <input type="text" placeholder="Full Name">
+    <input type="email" placeholder="Email Address">
+    <input type="text" placeholder="Heritage ID (Optional)">
+    <input type="password" placeholder="Create Password">
+    <input type="password" placeholder="Confirm Password">
+    
+    <button class="sign-in-btn">REGISTER</button>
+    
+    <div class="footer-links">
+        <p>Already have an account? <a href="index.html">Sign In</a></p>
+    </div>
+</div>
+
+
+        </div>
+    </div>
+
+</body>
+</html>
