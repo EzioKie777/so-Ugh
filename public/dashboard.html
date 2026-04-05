@@ -136,61 +136,108 @@
         </section>
 
         <section id="view-new-report" class="view-section">
-            <div class="view-header">
-                <h1>Submit Hazard Report</h1>
-                <p>File a new emergency or hazard report for immediate assessment.</p>
+    <div class="view-header">
+        <h1>Submit Hazard Report</h1>
+        <p>File a new emergency or hazard report for immediate assessment.</p>
+    </div>
+
+    <form id="fullReportForm">
+        <div class="form-card">
+            <div class="card-title">Incident Details</div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label>Incident Title</label>
+                <input type="text" id="fTitle" placeholder="e.g. Flooding near Baclayon Church" required>
             </div>
-
-            <form id="fullReportForm">
-                <div class="form-card">
-                    <div class="card-title">Incident Details</div>
-                    <div class="form-group" style="margin-bottom:20px;">
-                        <label>Incident Title</label>
-                        <input type="text" id="fTitle" placeholder="e.g. Flooding near Baclayon Church" required>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Hazard Type</label>
-                            <select id="fType">
-                                <option>Flood</option><option>Fire</option><option>Earthquake</option><option>Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Severity</label>
-                            <select id="fSeverity">
-                                <option>Low</option><option selected>Moderate</option><option>Critical</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Detailed Description</label>
-                        <textarea id="fDesc" rows="4" placeholder="Describe the hazard, visible damage, and immediate risks..."></textarea>
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Hazard Type</label>
+                    <select id="fType">
+                        <option value="Flood">Flood</option>
+                        <option value="Fire">Fire</option>
+                        <option value="Earthquake">Earthquake</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
-
-                <div class="form-card">
-                    <div class="card-title">Location & Impact</div>
-                    <label>Pin Location on Map</label>
-                    <div class="map-placeholder">
-                        <div style="text-align:center;">
-                            <span style="font-size:30px;">📍</span><br>
-                            <span style="font-size:18px; font-weight:700;">Tagbilaran City</span><br>
-                            <span style="color:var(--text-grey); font-size:13px;">Map Interface Placeholder</span>
-                        </div>
-                        <div class="map-overlay-text">Lat: 9.65000 Lon: 123.85000</div>
-                    </div>
-                    <div class="form-group" style="margin-top:20px;">
-                        <label>Address / Location Description</label>
-                        <input type="text" id="fAddress" placeholder="Street, Barangay, Landmark">
-                    </div>
+                <div class="form-group">
+                    <label>Severity</label>
+                    <select id="fSeverity">
+                        <option value="Low">Low</option>
+                        <option value="Moderate" selected>Moderate</option>
+                        <option value="Critical">Critical</option>
+                    </select>
                 </div>
+            </div>
+            <div class="form-group">
+                <label>Detailed Description</label>
+                <textarea id="fDesc" rows="4" placeholder="Describe the hazard, visible damage, and immediate risks..."></textarea>
+            </div>
+        </div>
 
-                <div class="form-footer">
-                    <button type="button" class="btn-cancel" onclick="switchTab('reports')">Cancel</button>
-                    <button type="submit" class="btn-submit" id="submitBtn">Submit Report</button>
+        <div class="form-card">
+            <div class="card-title">Location & Impact</div>
+            <label>Pin Location on Map</label>
+            <div class="map-placeholder">
+                <div style="text-align:center;">
+                    <span style="font-size:30px;">📍</span><br>
+                    <span style="font-size:18px; font-weight:700;">Tagbilaran City</span><br>
+                    <span style="color:var(--text-grey); font-size:13px;">Map Interface Placeholder</span>
                 </div>
-            </form>
-        </section>
+                <div class="map-overlay-text">Lat: 9.65000 Lon: 123.85000</div>
+            </div>
+            <div class="form-group" style="margin-top:20px;">
+                <label>Address / Location Description</label>
+                <input type="text" id="fAddress" placeholder="Street, Barangay, Landmark">
+            </div>
+            <div class="form-grid" style="margin-top:20px;">
+                <div class="form-group">
+                    <label>Affected Heritage Site (Optional)</label>
+                    <select id="fHeritageSite">
+                        <option value="">No specific site</option>
+                        <option value="Baclayon Church">Baclayon Church</option>
+                        <option value="Dauis Church">Dauis Church</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>Affected Radius (meters)</label>
+                    <input type="number" id="fRadius" value="50">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="card-title">Impact Assessment (Optional)</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Number of Casualties</label>
+                    <input type="number" id="fCasualties" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Est. Property Damage (₱)</label>
+                    <input type="number" id="fDamage" value="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="card-title">Reporter Info</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="fReporterName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number / Email</label>
+                    <input type="text" id="fReporterContact" placeholder="09123456789">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <button type="button" class="btn-cancel" onclick="switchTab('reports')">Cancel</button>
+            <button type="submit" class="btn-submit" id="submitBtn">Submit Report</button>
+        </div>
+    </form>
+</section>
     </main>
 
     <script>
