@@ -7,13 +7,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// 1. Connect to MongoDB (Paste your string here)
-const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("Connected to MongoDB Atlas!"))
-    .catch(err => console.error("Connection error:", err));
+// Use your connection string here (replace the placeholders!)
+const MONGO_URI = "mongodb+srv://eziokie:<db_password>@cluster0.hbawoz5.mongodb.net/?appName=Cluster0";
 
-// 2. Define the "Schema" (Like defining a Struct in C++)
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ SUCCESS: Connected to MongoDB Atlas!"))
+    .catch(err => console.error("❌ ERROR: Could not connect to MongoDB:", err));
+
+// Define the User Schema (The "Blueprint")
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true }
