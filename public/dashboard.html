@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoGuard - Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --primary: #8b4513; --sidebar-width: 350px; }
+        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: var(--sidebar-width);
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header { padding: 20px; background: var(--primary); color: white; }
+        .sidebar-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
+
+        /* Map Styling */
+        #map { flex-grow: 1; height: 100vh; }
+
+        /* Form Styling */
+        .report-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        select, textarea, .btn-report { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
+        
+        .btn-report { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-report:hover { background: #5d2e0d; }
+
+        #logout-btn { color: #fff; text-decoration: underline; cursor: pointer; font-size: 12px; margin-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3>Tagbi GeoGuard</h3>
+            <span id="user-display">Loading user...</span>
+            <a id="logout-btn" onclick="logout()">Sign Out</a>
+        </div>
+        
+        <div class="sidebar-content">
+            <h4>Report a Hazard</h4>
+            <div class="report-box">
+                <p style="font-size: 12px; color: #666;">Current Location: <span id="coords">Detecting...</span></p>
+                <form id="hazardForm">
+                    <select id="hazardType" required>
+                        <option value="">Select Hazard Type</option>
+                        <option value="Flood">Flood</option>
+                        <option value="Road Block">Road Block</option>
+                        <option value="Fire">Fire Hazard</option>
+                        <option value="Heritage Damage">Heritage Site Damage</option>
+                    </select>
+                    <textarea id="description" placeholder="Describe the situation..." rows="3" required></textarea>
+                    <button type="submit" class="btn-report" id="submitReport">SUBMIT REPORT</button>
+                </form>
+            </div>
+
+            <hr>
+            <h4>Recent Alerts</h4>
+            <div id="hazardList" style="font-size: 13px;">
+                </div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. Initialize Map centered on Tagbilaran City
+        const map = L.map('map').setView([9.6412, 123.8566], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 2. Get User Location
+        let currentPos = { lat: 9.6412, lng: 123.8566 };
+        navigator.geolocation.getCurrentPosition(pos => {
+            currentPos.lat = pos.coords.latitude;
+            currentPos.lng = pos.coords.longitude;
+            document.getElementById('coords').innerText = `${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)}`;
+            map.setView([currentPos.lat, currentPos.lng], 16);
+            L.marker([currentPos.lat, currentPos.lng]).addTo(map).bindPopup("You are here").openPopup();
+        });
+
+        // 3. Handle Logout
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        // 4. Submit Hazard to MongoDB (You'll need a route in server.js for this!)
+        document.getElementById('hazardForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitReport');
+    btn.innerText = "Uploading to Cloud...";
+    btn.disabled = true;
+
+    const reportData = {
+        type: document.getElementById('hazardType').value,
+        description: document.getElementById('description').value,
+        lat: currentPos.lat,
+        lng: currentPos.lng
+    };
+
+    try {
+        const response = await fetch('/api/report-hazard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData)
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert("Report Secured in MongoDB!"); // Or use your showMessage logic
+            // Add a red marker to the map immediately
+            L.marker([reportData.lat, reportData.lng]).addTo(map)
+                .bindPopup(`<b>${reportData.type}</b><br>${reportData.description}`)
+                .openPopup();
+                
+            document.getElementById('hazardForm').reset();
+        }
+    } catch (err) {
+        alert("Connection failed.");
+    } finally {
+        btn.innerText = "SUBMIT REPORT";
+        btn.disabled = false;
+    }
+});
+    </script>
+</body>
+</html>
