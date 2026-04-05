@@ -4,198 +4,302 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeoGuard - Command Center</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root { 
-            --primary: #8b4513; 
-            --khaki-bg: #f0e68c; /* Khaki shade */
-            --khaki-light: #f5f5dc; /* Beige/Cream */
-            --text-main: #2c3e50;
-            --border: #d4c5a0;
+            --primary: #f0e68c; /* Khaki shade for Sidebar */
+            --sidebar-text: #ffffff; /* White text for contrast */
+            --sidebar-hover: rgba(255, 255, 255, 0.1); /* Subtle hover */
+            --nav-active: rgba(255, 255, 255, 0.15); /* Distinctive active */
+            
+            --main-bg: #f5f4f0; /* Off-white for the content area */
+            --card-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-grey: #7f8c8d;
+            --danger: #e74c3c;
         }
 
         body, html { 
             height: 100%; 
             margin: 0; 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
             display: flex; 
-            background-color: var(--khaki-bg); /* Global Khaki Background */
+            overflow: hidden; 
+            background-color: var(--main-bg);
         }
 
         /* --- SIDEBAR --- */
         #sidebar {
             width: 320px; 
             height: 100vh; 
-            background: #fff;
+            background: #6a4f2b; /* Earthy/Khaki color matching image */
             display: flex; 
             flex-direction: column; 
-            border-right: 2px solid var(--border);
+            border-right: none;
             z-index: 1001;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            color: var(--sidebar-text);
         }
 
-        .sidebar-header { padding: 25px 20px; background: var(--khaki-light); border-bottom: 1px solid var(--border); }
+        /* Top Logo & Title */
+        .sidebar-header { 
+            padding: 30px 20px 10px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+        .nav-logo { width: 45px; height: auto; }
+        .header-title { margin:0; font-size: 20px; font-weight: 700; color: #fff; }
+        .header-subtitle { margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); }
+
+        /* Navigation Menu */
+        .sidebar-nav { padding: 30px 15px; flex-grow: 1; }
         
-        .sidebar-nav { padding: 15px 10px; flex-grow: 1; }
+        .nav-category { 
+            margin-bottom: 25px; 
+        }
+        .nav-label { 
+            font-size: 12px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            color: rgba(255,255,255,0.5); 
+            padding-left: 15px; 
+            margin-bottom: 10px; 
+        }
+
         .nav-item {
             display: flex; align-items: center; padding: 12px 15px;
             cursor: pointer; border-radius: 8px; margin-bottom: 5px;
-            color: var(--text-main); font-weight: 500; transition: 0.2s;
+            color: #fff; font-weight: 500; font-size: 15px; transition: 0.2s;
+            text-decoration: none;
         }
-        .nav-item:hover { background: var(--khaki-light); }
-        .nav-item.active { background: var(--primary); color: white; }
+        .nav-item:hover { background: var(--sidebar-hover); }
+        .nav-item.active { background: var(--nav-active); color: #fff; }
+        .nav-item .icon { margin-right: 15px; font-size: 20px; }
 
-        .sidebar-content { 
-            padding: 20px; 
-            height: 40%; 
-            overflow-y: auto; 
-            background: #fafafa; 
-            border-top: 1px solid var(--border);
-        }
-
-        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); background: var(--khaki-light); }
-
-        /* --- THE MAP (FIXED) --- */
-        #map-container {
-            flex-grow: 1;
-            position: relative;
-            height: 100vh; /* Force height */
-            background: #e0e0e0; /* Fallback color if map fails to load */
-        }
-        #map { 
-            width: 100%; 
-            height: 100%; /* Ensure it fills the container */
-        }
-
-        /* --- MODAL & FAB --- */
-        #fab-report {
-            position: fixed; bottom: 30px; right: 30px;
-            background: var(--primary); color: white; border: none;
-            padding: 15px 25px; border-radius: 50px; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000;
-        }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000;
-        }
-        .modal-card { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; }
+        /* User Footer */
+        .sidebar-footer { padding: 25px; border-top: 1px solid rgba(255,255,255,0.05); }
         
-        /* Form Inputs */
-        .report-form select, .report-form textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-send { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .user-panel { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .avatar-circle { 
+            width: 45px; height: 45px; 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 18px; font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .user-details h4 { margin: 0; font-size: 15px; color: #fff; }
+        .user-details p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); }
+
+        .signout-btn { 
+            width: 100%; display: flex; align-items: center; padding: 10px;
+            background: none; border: none; cursor: pointer; color: #fff; 
+            font-size: 14px; text-decoration: none; gap: 10px;
+        }
+        .signout-btn:hover { color: #fff; text-decoration: underline; }
+
+        /* --- MAIN CONTENT AREA --- */
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: var(--main-bg);
+        }
+
+        /* Top Sub-Bar (Breadcrumb) */
+        .top-bar { 
+            padding: 20px 40px; 
+            background: none; 
+            border-bottom: none; 
+            display: flex; align-items: center; gap: 10px; 
+            font-size: 14px; color: var(--text-grey); 
+        }
+
+        /* Main View Container */
+        .view-container { 
+            padding: 20px 40px; 
+        }
+        .main-title { font-size: 32px; font-weight: 700; margin: 0 0 30px 0; color: var(--text-dark); }
+
+        /* --- STATS CARDS ROW --- */
+        .stats-row { 
+            display: flex; gap: 20px; margin-bottom: 30px; 
+        }
+        .stat-card {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            position: relative;
+        }
+        .card-icon { position: absolute; top: 25px; right: 25px; color: #999; font-size: 18px; }
+        
+        .stat-title { font-size: 14px; font-weight: 500; color: #555; margin: 0 0 10px 0; }
+        .stat-number { font-size: 40px; font-weight: 700; color: var(--text-dark); margin: 0 0 5px 0; }
+        .stat-meta { font-size: 13px; color: var(--text-grey); margin: 0; }
+        .stat-critical { color: var(--danger); font-weight: 600; }
+
+        /* --- ACTIVITY PANELS ROW --- */
+        .activity-row { 
+            display: flex; gap: 20px; 
+        }
+        .activity-card {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            min-height: 200px;
+        }
+        .card-header { font-size: 16px; font-weight: 600; color: var(--text-dark); margin: 0 0 10px 0; }
+        .card-description { font-size: 13px; color: var(--text-grey); margin: 0; line-height: 1.5; }
+
+        /* Standard Icon Stand-ins (Matching image style) */
+        .icon-small { font-weight: normal; font-size: 13px; opacity: 0.7; }
+
     </style>
 </head>
 <body>
 
     <aside id="sidebar">
         <div class="sidebar-header">
-            <h2 style="margin:0; font-size:20px; color:var(--primary);">GeoGuard</h2>
-            <small>Tagbilaran Dashboard</small>
+            <img src="logo.png" alt="GeoGuard Logo" class="nav-logo">
+            <div>
+                <h2 class="header-title">Tagbi GeoGuard</h2>
+                <p class="header-subtitle">Heritage Protection</p>
+            </div>
         </div>
 
         <nav class="sidebar-nav">
-            <div class="nav-item active" onclick="switchView('center', this)">📡 Command Center</div>
-            <div class="nav-item" onclick="switchView('reports', this)">⚠️ Active Reports</div>
-            <div class="nav-item" onclick="switchView('heritage', this)">🏛️ Heritage Sites</div>
-            <div class="nav-item" onclick="switchView('risk', this)">📊 Risk Analysis</div>
+            <div class="nav-category">
+                <div class="nav-label">Operations</div>
+                <a href="#" class="nav-item active">
+                    <span class="icon">▣</span> Command Center
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">📄</span> Active Reports
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🏛️</span> Heritage Sites
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">📊</span> Risk Analysis
+                </a>
+            </div>
         </nav>
 
-        <div class="sidebar-content" id="sidebarView"></div>
-
         <div class="sidebar-footer">
-            <div style="font-size:14px; font-weight:600;">@RoyGabriel</div>
-            <button style="margin-top:10px; width:100%; cursor:pointer;" onclick="location.href='index.html'">Sign Out</button>
+            <div class="user-panel">
+                <div class="avatar-circle">G</div>
+                <div class="user-details">
+                    <h4 id="userName">Gab riel708</h4>
+                    <p id="userEmail">freakless708@gmail.com</p>
+                </div>
+                <div style="margin-left: auto; color: rgba(255,255,255,0.4);">👤</div>
+            </div>
+            <a href="index.html" class="signout-btn">
+                <span>↳</span> Sign Out
+            </a>
         </div>
     </aside>
 
-    <div id="map-container">
-        <div id="map"></div>
-    </div>
-
-    <button id="fab-report" onclick="toggleModal(true)">+ Report Hazard</button>
-
-    <div id="modal-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h3>Report Hazard</h3>
-            <form id="hazardForm" class="report-form">
-                <select id="hType" required>
-                    <option value="">Select Type</option>
-                    <option value="Flood">Flood</option>
-                    <option value="Road Block">Road Block</option>
-                    <option value="Heritage Damage">Heritage Site Damage</option>
-                </select>
-                <textarea id="hDesc" placeholder="Describe the hazard..." rows="4" required></textarea>
-                <button type="submit" class="btn-send" id="hBtn">Submit Report</button>
-                <button type="button" onclick="toggleModal(false)" style="background:none; border:none; color:grey; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // 1. Initialize Map - Center on Tagbilaran
-        // If the map is still blank, make sure you have an internet connection to load the tiles!
-        const map = L.map('map').setView([9.6412, 123.8566], 14);
+    <main id="main-content">
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        <div class="top-bar">
+            <span>▣</span> Bohol Emergency Management
+        </div>
 
-        // Fix for Leaflet maps not rendering correctly in flex containers
-        setTimeout(() => { map.invalidateSize(); }, 200);
+        <div class="view-container">
+            <h1 class="main-title">Command Center</h1>
 
-        let myCoords = { lat: 9.6412, lng: 123.8566 };
+            <div class="stats-row">
+                <div class="stat-card">
+                    <p class="stat-title">Active Hazards</p>
+                    <div class="card-icon">⚠︎</div>
+                    <p class="stat-number">0</p>
+                    <p class="stat-meta"><span class="stat-critical">0</span> critical</p>
+                </div>
 
-        navigator.geolocation.getCurrentPosition(p => {
-            myCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
-            map.setView([myCoords.lat, myCoords.lng], 16);
-            L.marker([myCoords.lat, myCoords.lng]).addTo(map).bindPopup("You are here").openPopup();
-        }, () => {
-            console.log("Geolocation blocked or failed.");
-        });
+                <div class="stat-card">
+                    <p class="stat-title">Affected Heritage Sites</p>
+                    <div class="card-icon">🏛️</div>
+                    <p class="stat-number">0</p>
+                    <p class="stat-meta">Out of 0 total sites</p>
+                </div>
 
-        function toggleModal(show) {
-            document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none';
+                <div class="stat-card">
+                    <p class="stat-title">Resolved This Month</p>
+                    <div class="card-icon">✅</div>
+                    <p class="stat-number">0</p>
+                    <p class="stat-meta">Total reports: 0</p>
+                </div>
+
+                <div class="stat-card">
+                    <p class="stat-title">Risk Trend</p>
+                    <div class="card-icon">📈</div>
+                    <div style="height: 60px;"></div>
+                </div>
+            </div>
+
+            <div class="activity-row">
+                <div class="activity-card">
+                    <p class="card-header">Recent Activity</p>
+                    <p class="card-description">
+                        Latest hazard reports requiring attention.
+                    </p>
+                    </div>
+
+                <div class="activity-card">
+                    <p class="card-header">Heritage Sites at Risk</p>
+                    <p class="card-description">
+                        Highest risk scores based on active hazards.
+                    </p>
+                    </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // --- 1. USER SESSION LOADING ---
+        // Mock data matching the image
+        const userData = {
+            name: "Gab riel708",
+            email: "freakless708@gmail.com",
+            initial: "G"
+        };
+
+        function loadSession() {
+            document.getElementById('userName').innerText = userData.name;
+            document.getElementById('userEmail').innerText = userData.email;
+            document.querySelector('.avatar-circle').innerText = userData.initial;
         }
 
-        function switchView(view, el) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            const cont = document.getElementById('sidebarView');
-            cont.innerHTML = `<h4>${view}</h4><p style="font-size:13px">Viewing data for Tagbilaran City...</p>`;
-        }
-
-        document.getElementById('hazardForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('hBtn');
-            btn.innerText = "Saving...";
-            
-            const payload = {
-                type: document.getElementById('hType').value,
-                description: document.getElementById('hDesc').value,
-                lat: myCoords.lat,
-                lng: myCoords.lng
-            };
-
+        // --- 2. STATISTICS LOADER (FETCH FROM MONGODB) ---
+        // This function will eventually talk to your server routes to update the '0's
+        async function fetchStats() {
             try {
-                const res = await fetch('/api/report-hazard', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
+                // Fetch active hazards count
+                // const res = await fetch('/api/stats/hazards');
+                // const data = await res.json();
+                // document.getElementById('activeHazardsCount').innerText = data.total;
+            } catch (err) {
+                console.error("Stats fetch failed.", err);
+            }
+        }
 
-                if(res.ok) {
-                    toggleModal(false);
-                    L.circle([payload.lat, payload.lng], {color: 'red', radius: 40}).addTo(map).bindPopup(payload.type);
-                    document.getElementById('hazardForm').reset();
-                }
-            } catch (err) { alert("Failed to connect to server."); }
-            
-            btn.innerText = "Submit Report";
-        });
+        // Initialize on load
+        window.onload = () => {
+            loadSession();
+            fetchStats();
+        };
 
-        window.onload = () => { switchView('Command Center', document.querySelector('.nav-item')); };
     </script>
 </body>
 </html>
