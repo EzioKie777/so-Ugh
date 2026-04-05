@@ -3,132 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoGuard</title>
+    <title>GeoGuard - Sign In</title>
     <style>
-    body, html {
-        height: 100%;
-        margin: 0;
-        font-family: 'Arial', sans-serif;
-    }
+        :root { --primary: #8b4513; --primary-hover: #5d2e0d; --bg-gray: #f4f4f4; }
+        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-    .login-container {
-        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                    url('background1.jpeg'); 
-        background-size: cover;
-        background-position: center;
-        height: 100vh;
-        display: flex;
-        justify-content: center; 
-        align-items: center;     
-    }
+        .login-container {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('background1.jpeg'); 
+            background-size: cover; background-position: center;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+        }
 
-    .login-card {
-        background: white;
-        display: flex; 
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        max-width: 700px; /* Slightly wider to fit the new header */
-        width: 90%;
-    }
+        .login-card {
+            background: white; display: flex; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5); max-width: 800px; width: 90%; min-height: 450px;
+        }
 
-    .card-left {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        background-color: #ffffff;
-    }
+        .card-left { flex: 1; display: flex; align-items: center; background: #fff; }
+        .card-left img { width: 100%; height: 100%; object-fit: cover; }
 
-    .card-right {
-        flex: 1;
-        padding: 40px;
-        background-color: #f4f4f4;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
+        .card-right { flex: 1; padding: 40px; background-color: var(--bg-gray); display: flex; flex-direction: column; justify-content: center; }
 
-    /* --- NEW HEADER SECTION (Outside the button!) --- */
-    .card-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 25px;
-    }
+        .card-header { display: flex; align-items: center; margin-bottom: 25px; gap: 15px; }
+        .header-logo { width: 50px; height: auto; }
+        .header-text-block h2 { margin: 0; font-size: 24px; color: #2c3e50; }
+        .header-text-block p { margin: 0; font-size: 14px; color: #7f8c8d; }
 
-    .header-logo {
-        width: 50px; /* Try 70px for a clear but balanced look */
-        height: auto;
-        margin-bottom: 20px;
-    }
+        form { display: flex; flex-direction: column; gap: 12px; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
+        input:focus { border-color: var(--primary); }
 
-    .header-text-block h2 {
-        margin: 0;
-        font-size: 35px;
-        color: #2c3e50;
-    }
+        .action-btn {
+            background-color: var(--primary); color: white; padding: 14px; border: none;
+            border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .action-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
 
-    .header-text-block p {
-        margin: 0;
-        font-size: 23px;
-        color: #7f8c8d;
-    }
-    /* ----------------------------------------------- */
+        .footer-links { margin-top: 20px; text-align: center; font-size: 13px; color: #555; }
+        .footer-links a { color: var(--primary); text-decoration: none; font-weight: bold; }
 
-    input {
-        margin: 10px 0;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .sign-in-btn {
-        background-color: #8b4513; 
-        color: white;
-        padding: 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        margin-top: 10px;
-    }
-
-    .footer-links {
-        margin-top: 15px;
-        text-align: center;
-    }
-
-    .footer-links a {
-        font-size: 13px;
-        color: #8b4513;
-        text-decoration: none;
-    }
-</style> 
+        @media (max-width: 768px) {
+            .login-card { flex-direction: column; max-width: 400px; }
+            .card-left { display: none; }
+        }
+    </style>
 </head>
 <body>
-
     <div class="login-container">
         <div class="login-card">
             <div class="card-left">
-                <img src="Illustration.png" alt="Heritage Building Photo" style="width: 100%; height: auto;">
+                <img src="Illustration.png" alt="Heritage Photo">
             </div>
             <div class="card-right">
-            <div class="card-header">
-                 <img src="logo.png" alt="GeoGuard Shield Logo" class="header-logo">
-            <div class="header-text-block">
-                <h2>Tagbi GeoGuard</h2>
-                <p>Hazard Reporting Platform</p>
-        </div>
-        </div>
-                <input type="text" placeholder="Heritage ID / Email Address">
-                <input type="password" placeholder="Password">
-                <button class="sign-in-btn">SIGN IN</button>
-            <div class="footer-links">
-                <a href="register.html">Create an Account</a>
-        </div>
-        </div>
-
+                <div class="card-header">
+                    <img src="logo.png" alt="Logo" class="header-logo">
+                    <div class="header-text-block">
+                        <h2>Tagbi GeoGuard</h2>
+                        <p>Hazard Reporting Platform</p>
+                    </div>
+                </div>
+                <form id="loginForm">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" class="action-btn" id="loginBtn">SIGN IN</button>
+                </form>
+                <div class="footer-links">
+                    Don't have an account? <a href="register.html">Create Account</a>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = "Authenticating...";
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) { alert("Server error. Try again."); }
+            btn.innerText = "SIGN IN";
+        });
+    </script>
 </body>
 </html>
