@@ -8,220 +8,195 @@
     <style>
         :root { 
             --primary: #8b4513; 
-            --primary-light: #fdf5ef;
-            --sidebar-bg: #ffffff;
+            --primary-dark: #5d2e0d;
+            --bg-light: #fafafa;
             --text-main: #2c3e50;
             --text-sub: #7f8c8d;
             --border: #eeeeee;
         }
 
-        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; overflow: hidden; }
+        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; }
 
-        /* --- SIDEBAR STRUCTURE --- */
+        /* --- SIDEBAR --- */
         #sidebar {
-            width: 320px;
-            height: 100vh;
-            background: var(--sidebar-bg);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border);
+            width: 320px; height: 100vh; background: #fff;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border);
             z-index: 1001;
         }
 
-        /* Branding */
         .sidebar-header { padding: 25px 20px; display: flex; align-items: center; gap: 12px; }
         .nav-logo { width: 45px; height: auto; }
-        .header-text h2 { margin: 0; font-size: 20px; color: var(--text-main); }
-        .header-text p { margin: 0; font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Navigation Menu */
-        .sidebar-nav { padding: 10px; }
+        
+        .sidebar-nav { padding: 10px; flex-grow: 1; }
         .nav-item {
             display: flex; align-items: center; padding: 12px 15px;
             text-decoration: none; color: var(--text-main); font-weight: 500;
-            border-radius: 8px; margin-bottom: 4px; transition: 0.2s; cursor: pointer;
+            border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: 0.2s;
         }
-        .nav-item:hover { background: var(--primary-light); color: var(--primary); }
+        .nav-item:hover { background: #fdf5ef; color: var(--primary); }
         .nav-item.active { background: var(--primary); color: white; }
-        .nav-item .icon { margin-right: 12px; font-size: 18px; }
 
-        /* Dynamic Content Area */
-        .sidebar-content {
-            flex-grow: 1; padding: 20px; border-top: 1px solid var(--border);
-            overflow-y: auto; background-color: #fafafa;
-        }
+        .sidebar-content { padding: 20px; border-top: 1px solid var(--border); height: 40%; overflow-y: auto; background: var(--bg-light); }
 
-        /* Footer / Account Section */
-        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); background: #fff; }
-        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .user-avatar { 
-            width: 38px; height: 38px; background: var(--primary); 
-            color: white; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-weight: bold;
-        }
-        .user-details p { margin: 0; font-size: 14px; font-weight: 600; }
-        .user-details span { font-size: 11px; color: var(--text-sub); }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .user-box { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { width: 35px; height: 35px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         
-        .logout-btn {
-            width: 100%; padding: 8px; background: none; border: 1px solid #ddd;
-            border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.3s;
-        }
-        .logout-btn:hover { color: #e74c3c; border-color: #ffcccc; background: #fff5f5; }
+        .logout-btn { width: 100%; padding: 8px; background: none; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .logout-btn:hover { color: #e74c3c; border-color: #ffcccc; }
 
-        /* --- MAP SECTION --- */
-        #map { flex-grow: 1; height: 100vh; }
+        /* --- MAP & FAB --- */
+        #map { flex-grow: 1; height: 100vh; z-index: 1; }
 
-        /* Reusable UI Components for Sidebar Views */
-        .view-title { font-size: 18px; margin-bottom: 15px; color: var(--text-main); }
-        .report-form input, .report-form select, .report-form textarea {
-            width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;
-            border-radius: 6px; box-sizing: border-box; font-family: inherit;
+        #fab-report {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--primary); color: white; border: none;
+            padding: 15px 25px; border-radius: 50px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000;
         }
-        .btn-submit {
-            width: 100%; padding: 12px; background: var(--primary); color: white;
-            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
+        .modal-card { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        
+        .report-form input, .report-form select, .report-form textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-send { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <aside id="sidebar">
         <div class="sidebar-header">
-            <img src="logo.png" alt="GeoGuard Logo" class="nav-logo">
-            <div class="header-text">
-                <h2>GeoGuard</h2>
-                <p>Tagbilaran City</p>
-            </div>
+            <img src="logo.png" class="nav-logo">
+            <div><h2 style="margin:0; font-size:18px;">GeoGuard</h2><small style="color:var(--text-sub)">Tagbilaran City</small></div>
         </div>
 
         <nav class="sidebar-nav">
-            <div class="nav-item active" onclick="switchView('center', this)">
-                <span class="icon">📡</span> Command Center
-            </div>
-            <div class="nav-item" onclick="switchView('reports', this)">
-                <span class="icon">⚠️</span> Active Reports
-            </div>
-            <div class="nav-item" onclick="switchView('heritage', this)">
-                <span class="icon">🏛️</span> Heritage Sites
-            </div>
-            <div class="nav-item" onclick="switchView('risk', this)">
-                <span class="icon">📊</span> Risk Analysis
-            </div>
+            <div class="nav-item active" onclick="switchView('center', this)">📡 Command Center</div>
+            <div class="nav-item" onclick="switchView('reports', this)">⚠️ Active Reports</div>
+            <div class="nav-item" onclick="switchView('heritage', this)">🏛️ Heritage Sites</div>
+            <div class="nav-item" onclick="switchView('risk', this)">📊 Risk Analysis</div>
         </nav>
 
         <div class="sidebar-content" id="sidebarView">
             </div>
 
         <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar" id="userInitial">U</div>
-                <div class="user-details">
-                    <p id="userNameDisplay">@User</p>
-                    <span>Verified Responder</span>
-                </div>
+            <div class="user-box">
+                <div class="avatar" id="uInit">U</div>
+                <div><div id="uName" style="font-size:14px; font-weight:600;">@username</div><small style="color:var(--text-sub)">Responder</small></div>
             </div>
-            <button class="logout-btn" onclick="logout()">Sign Out</button>
+            <button class="logout-btn" onclick="location.href='index.html'">Sign Out</button>
         </div>
     </aside>
 
-    <main id="map"></main>
+    <div id="map"></div>
+
+    <button id="fab-report" onclick="toggleModal(true)">+ Report Hazard</button>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="margin:0">Report Hazard</h3>
+                <span style="cursor:pointer" onclick="toggleModal(false)">&times;</span>
+            </div>
+            <form id="hazardForm" class="report-form">
+                <select id="hType" required>
+                    <option value="">Select Type</option>
+                    <option value="Flood">Flood</option>
+                    <option value="Road Block">Road Block</option>
+                    <option value="Heritage Site Damage">Heritage Site Damage</option>
+                </select>
+                <textarea id="hDesc" placeholder="What's happening?" rows="4" required></textarea>
+                <button type="submit" class="btn-send" id="hBtn">Submit Report</button>
+            </form>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 1. INITIALIZE MAP ---
-        const map = L.map('map').setView([9.6412, 123.8566], 14); // Tagbilaran Center
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+        const map = L.map('map').setView([9.6412, 123.8566], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        let currentCoords = { lat: 9.6412, lng: 123.8566 };
+        let myCoords = { lat: 9.6412, lng: 123.8566 };
 
-        // Get GPS Location
-        navigator.geolocation.getCurrentPosition(pos => {
-            currentCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            map.setView([currentCoords.lat, currentCoords.lng], 16);
-            L.marker([currentCoords.lat, currentCoords.lng]).addTo(map).bindPopup("Your Location").openPopup();
+        navigator.geolocation.getCurrentPosition(p => {
+            myCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
+            map.setView([myCoords.lat, myCoords.lng], 16);
+            L.marker([myCoords.lat, myCoords.lng]).addTo(map).bindPopup("You are here").openPopup();
         });
 
-        // --- 2. VIEW SWITCHING LOGIC ---
-        function switchView(viewName, element) {
-            // Update Active Class
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            element.classList.add('active');
+        function toggleModal(show) {
+            document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none';
+        }
 
-            const container = document.getElementById('sidebarView');
-            
-            if (viewName === 'center') {
-                container.innerHTML = `
-                    <h3 class="view-title">New Hazard Report</h3>
-                    <form class="report-form" id="hazardForm">
-                        <select id="hType" required>
-                            <option value="">Select Hazard Type</option>
-                            <option value="Flood">Flood</option>
-                            <option value="Road Block">Road Block</option>
-                            <option value="Heritage Damage">Heritage Site Damage</option>
-                        </select>
-                        <textarea id="hDesc" placeholder="Describe the hazard..." rows="4" required></textarea>
-                        <button type="submit" class="btn-submit" id="hBtn">SUBMIT TO CLOUD</button>
-                    </form>
-                `;
-                setupFormListener(); // Re-attach listener to new HTML
-            } 
-            else if (viewName === 'reports') {
-                container.innerHTML = `<h3 class="view-title">Active Alerts</h3><div id="reportList">Loading reports...</div>`;
-                // Function to fetch and display reports would go here
-            }
-            else {
-                container.innerHTML = `<h3 class="view-title">Feature Coming Soon</h3><p>Integrating data for ${viewName}...</p>`;
+        function switchView(view, el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            const cont = document.getElementById('sidebarView');
+
+            if(view === 'reports') {
+                cont.innerHTML = `<h4>Active Reports</h4><div id="list">Fetching live data...</div>`;
+                fetchReports(); 
+            } else if(view === 'center') {
+                cont.innerHTML = `<h4>Status</h4><p style="font-size:13px">All systems operational. Map shows local Tagbilaran activity.</p>`;
+            } else {
+                cont.innerHTML = `<h4>${view}</h4><p>Data layer loading...</p>`;
             }
         }
 
-        // --- 3. FORM SUBMISSION ---
-        function setupFormListener() {
-            const form = document.getElementById('hazardForm');
-            if(!form) return;
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('hBtn');
-                btn.innerText = "Syncing...";
-                btn.disabled = true;
-
-                const data = {
-                    type: document.getElementById('hType').value,
-                    description: document.getElementById('hDesc').value,
-                    lat: currentCoords.lat,
-                    lng: currentCoords.lng
-                };
-
-                try {
-                    const res = await fetch('/api/report-hazard', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    if (res.ok) {
-                        alert("Report Live in MongoDB!");
-                        L.circle([data.lat, data.lng], {color: 'red', radius: 50}).addTo(map);
-                        form.reset();
-                    }
-                } catch (err) { alert("Error connecting to server."); }
+        async function fetchReports() {
+            try {
+                const res = await fetch('/api/hazards');
+                const data = await res.json();
+                const list = document.getElementById('list');
+                list.innerHTML = data.map(h => `
+                    <div style="background:#fff; padding:10px; margin-bottom:5px; border-radius:5px; border-left:4px solid var(--primary);">
+                        <strong>${h.type}</strong><br><small>${h.description}</small>
+                    </div>
+                `).join('');
                 
-                btn.innerText = "SUBMIT TO CLOUD";
-                btn.disabled = false;
-            });
+                // Also plot them on the map
+                data.forEach(h => {
+                    L.circle([h.lat, h.lng], {color: 'red', radius: 30}).addTo(map).bindPopup(h.type);
+                });
+            } catch (e) { console.error("Error fetching", e); }
         }
 
-        // --- 4. AUTH & SESSION ---
-        function logout() { window.location.href = 'index.html'; }
+        document.getElementById('hazardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('hBtn');
+            btn.innerText = "Syncing...";
+            
+            const payload = {
+                type: document.getElementById('hType').value,
+                description: document.getElementById('hDesc').value,
+                lat: myCoords.lat,
+                lng: myCoords.lng
+            };
 
-        // Initial Load
+            const res = await fetch('/api/report-hazard', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if(res.ok) {
+                toggleModal(false);
+                L.circle([payload.lat, payload.lng], {color: 'red', radius: 40}).addTo(map);
+                document.getElementById('hazardForm').reset();
+            }
+            btn.innerText = "Submit Report";
+        });
+
         window.onload = () => {
             switchView('center', document.querySelector('.nav-item'));
-            // Optional: Fetch actual username from session/localStorage
-            const name = "Thomas Edison"; 
-            document.getElementById('userNameDisplay').innerText = `@${name.replace(/\s/g, '').toLowerCase()}`;
-            document.getElementById('userInitial').innerText = name[0];
+            document.getElementById('uName').innerText = "@RoyGabriel"; // Replace with session data later
+            document.getElementById('uInit').innerText = "R";
         };
     </script>
 </body>
