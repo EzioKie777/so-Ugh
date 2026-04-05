@@ -122,10 +122,9 @@
     </div>
 
 <form id="registerForm">
-    <input type="text" id="fullName" placeholder="Full Name" required>
-    <input type="email" id="email" placeholder="Email Address" required>
-    <input type="password" id="password" placeholder="Create Password" required>
-    <button type="submit" class="sign-in-btn">REGISTER</button>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Register</button>
 </form>
 
     <div class="footer-links">
@@ -136,6 +135,26 @@
 
         </div>
     </div>
+    
+<script>
+    const registerForm = document.getElementById('registerForm');
 
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop the page from refreshing
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Send the data to your server.js
+        const response = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        alert(result.message); // This will say "Account saved!"
+    });
+</script>
 </body>
 </html>
