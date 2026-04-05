@@ -8,46 +8,66 @@
     <style>
         :root { 
             --primary: #8b4513; 
-            --primary-dark: #5d2e0d;
-            --bg-light: #fafafa;
+            --khaki-bg: #f0e68c; /* Khaki shade */
+            --khaki-light: #f5f5dc; /* Beige/Cream */
             --text-main: #2c3e50;
-            --text-sub: #7f8c8d;
-            --border: #eeeeee;
+            --border: #d4c5a0;
         }
 
-        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; }
+        body, html { 
+            height: 100%; 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            background-color: var(--khaki-bg); /* Global Khaki Background */
+        }
 
         /* --- SIDEBAR --- */
         #sidebar {
-            width: 320px; height: 100vh; background: #fff;
-            display: flex; flex-direction: column; border-right: 1px solid var(--border);
+            width: 320px; 
+            height: 100vh; 
+            background: #fff;
+            display: flex; 
+            flex-direction: column; 
+            border-right: 2px solid var(--border);
             z-index: 1001;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
         }
 
-        .sidebar-header { padding: 25px 20px; display: flex; align-items: center; gap: 12px; }
-        .nav-logo { width: 45px; height: auto; }
+        .sidebar-header { padding: 25px 20px; background: var(--khaki-light); border-bottom: 1px solid var(--border); }
         
-        .sidebar-nav { padding: 10px; flex-grow: 1; }
+        .sidebar-nav { padding: 15px 10px; flex-grow: 1; }
         .nav-item {
             display: flex; align-items: center; padding: 12px 15px;
-            text-decoration: none; color: var(--text-main); font-weight: 500;
-            border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: 0.2s;
+            cursor: pointer; border-radius: 8px; margin-bottom: 5px;
+            color: var(--text-main); font-weight: 500; transition: 0.2s;
         }
-        .nav-item:hover { background: #fdf5ef; color: var(--primary); }
+        .nav-item:hover { background: var(--khaki-light); }
         .nav-item.active { background: var(--primary); color: white; }
 
-        .sidebar-content { padding: 20px; border-top: 1px solid var(--border); height: 40%; overflow-y: auto; background: var(--bg-light); }
+        .sidebar-content { 
+            padding: 20px; 
+            height: 40%; 
+            overflow-y: auto; 
+            background: #fafafa; 
+            border-top: 1px solid var(--border);
+        }
 
-        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); }
-        .user-box { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .avatar { width: 35px; height: 35px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .logout-btn { width: 100%; padding: 8px; background: none; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .logout-btn:hover { color: #e74c3c; border-color: #ffcccc; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); background: var(--khaki-light); }
 
-        /* --- MAP & FAB --- */
-        #map { flex-grow: 1; height: 100vh; z-index: 1; }
+        /* --- THE MAP (FIXED) --- */
+        #map-container {
+            flex-grow: 1;
+            position: relative;
+            height: 100vh; /* Force height */
+            background: #e0e0e0; /* Fallback color if map fails to load */
+        }
+        #map { 
+            width: 100%; 
+            height: 100%; /* Ensure it fills the container */
+        }
 
+        /* --- MODAL & FAB --- */
         #fab-report {
             position: fixed; bottom: 30px; right: 30px;
             background: var(--primary); color: white; border: none;
@@ -55,15 +75,14 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000;
         }
 
-        /* --- MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000;
         }
         .modal-card { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         
-        .report-form input, .report-form select, .report-form textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        /* Form Inputs */
+        .report-form select, .report-form textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .btn-send { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -71,8 +90,8 @@
 
     <aside id="sidebar">
         <div class="sidebar-header">
-            <img src="logo.png" class="nav-logo">
-            <div><h2 style="margin:0; font-size:18px;">GeoGuard</h2><small style="color:var(--text-sub)">Tagbilaran City</small></div>
+            <h2 style="margin:0; font-size:20px; color:var(--primary);">GeoGuard</h2>
+            <small>Tagbilaran Dashboard</small>
         </div>
 
         <nav class="sidebar-nav">
@@ -82,45 +101,49 @@
             <div class="nav-item" onclick="switchView('risk', this)">📊 Risk Analysis</div>
         </nav>
 
-        <div class="sidebar-content" id="sidebarView">
-            </div>
+        <div class="sidebar-content" id="sidebarView"></div>
 
         <div class="sidebar-footer">
-            <div class="user-box">
-                <div class="avatar" id="uInit">U</div>
-                <div><div id="uName" style="font-size:14px; font-weight:600;">@username</div><small style="color:var(--text-sub)">Responder</small></div>
-            </div>
-            <button class="logout-btn" onclick="location.href='index.html'">Sign Out</button>
+            <div style="font-size:14px; font-weight:600;">@RoyGabriel</div>
+            <button style="margin-top:10px; width:100%; cursor:pointer;" onclick="location.href='index.html'">Sign Out</button>
         </div>
     </aside>
 
-    <div id="map"></div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 
     <button id="fab-report" onclick="toggleModal(true)">+ Report Hazard</button>
 
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-card">
-            <div class="modal-header">
-                <h3 style="margin:0">Report Hazard</h3>
-                <span style="cursor:pointer" onclick="toggleModal(false)">&times;</span>
-            </div>
+            <h3>Report Hazard</h3>
             <form id="hazardForm" class="report-form">
                 <select id="hType" required>
                     <option value="">Select Type</option>
                     <option value="Flood">Flood</option>
                     <option value="Road Block">Road Block</option>
-                    <option value="Heritage Site Damage">Heritage Site Damage</option>
+                    <option value="Heritage Damage">Heritage Site Damage</option>
                 </select>
-                <textarea id="hDesc" placeholder="What's happening?" rows="4" required></textarea>
+                <textarea id="hDesc" placeholder="Describe the hazard..." rows="4" required></textarea>
                 <button type="submit" class="btn-send" id="hBtn">Submit Report</button>
+                <button type="button" onclick="toggleModal(false)" style="background:none; border:none; color:grey; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
             </form>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // 1. Initialize Map - Center on Tagbilaran
+        // If the map is still blank, make sure you have an internet connection to load the tiles!
         const map = L.map('map').setView([9.6412, 123.8566], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Fix for Leaflet maps not rendering correctly in flex containers
+        setTimeout(() => { map.invalidateSize(); }, 200);
 
         let myCoords = { lat: 9.6412, lng: 123.8566 };
 
@@ -128,6 +151,8 @@
             myCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
             map.setView([myCoords.lat, myCoords.lng], 16);
             L.marker([myCoords.lat, myCoords.lng]).addTo(map).bindPopup("You are here").openPopup();
+        }, () => {
+            console.log("Geolocation blocked or failed.");
         });
 
         function toggleModal(show) {
@@ -138,39 +163,13 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
             const cont = document.getElementById('sidebarView');
-
-            if(view === 'reports') {
-                cont.innerHTML = `<h4>Active Reports</h4><div id="list">Fetching live data...</div>`;
-                fetchReports(); 
-            } else if(view === 'center') {
-                cont.innerHTML = `<h4>Status</h4><p style="font-size:13px">All systems operational. Map shows local Tagbilaran activity.</p>`;
-            } else {
-                cont.innerHTML = `<h4>${view}</h4><p>Data layer loading...</p>`;
-            }
-        }
-
-        async function fetchReports() {
-            try {
-                const res = await fetch('/api/hazards');
-                const data = await res.json();
-                const list = document.getElementById('list');
-                list.innerHTML = data.map(h => `
-                    <div style="background:#fff; padding:10px; margin-bottom:5px; border-radius:5px; border-left:4px solid var(--primary);">
-                        <strong>${h.type}</strong><br><small>${h.description}</small>
-                    </div>
-                `).join('');
-                
-                // Also plot them on the map
-                data.forEach(h => {
-                    L.circle([h.lat, h.lng], {color: 'red', radius: 30}).addTo(map).bindPopup(h.type);
-                });
-            } catch (e) { console.error("Error fetching", e); }
+            cont.innerHTML = `<h4>${view}</h4><p style="font-size:13px">Viewing data for Tagbilaran City...</p>`;
         }
 
         document.getElementById('hazardForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('hBtn');
-            btn.innerText = "Syncing...";
+            btn.innerText = "Saving...";
             
             const payload = {
                 type: document.getElementById('hType').value,
@@ -179,25 +178,24 @@
                 lng: myCoords.lng
             };
 
-            const res = await fetch('/api/report-hazard', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+            try {
+                const res = await fetch('/api/report-hazard', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
 
-            if(res.ok) {
-                toggleModal(false);
-                L.circle([payload.lat, payload.lng], {color: 'red', radius: 40}).addTo(map);
-                document.getElementById('hazardForm').reset();
-            }
+                if(res.ok) {
+                    toggleModal(false);
+                    L.circle([payload.lat, payload.lng], {color: 'red', radius: 40}).addTo(map).bindPopup(payload.type);
+                    document.getElementById('hazardForm').reset();
+                }
+            } catch (err) { alert("Failed to connect to server."); }
+            
             btn.innerText = "Submit Report";
         });
 
-        window.onload = () => {
-            switchView('center', document.querySelector('.nav-item'));
-            document.getElementById('uName').innerText = "@RoyGabriel"; // Replace with session data later
-            document.getElementById('uInit').innerText = "R";
-        };
+        window.onload = () => { switchView('Command Center', document.querySelector('.nav-item')); };
     </script>
 </body>
 </html>
