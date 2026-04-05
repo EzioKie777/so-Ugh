@@ -3,134 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoGuard - Dashboard</title>
+    <title>GeoGuard - Command Center</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #8b4513; --sidebar-width: 350px; }
-        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; }
-
-        /* Sidebar Styling */
-        #sidebar {
-            width: var(--sidebar-width);
-            background: #fff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
+        :root { 
+            --primary: #8b4513; 
+            --primary-light: #fdf5ef;
+            --sidebar-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --border: #eeeeee;
         }
 
-        .sidebar-header { padding: 20px; background: var(--primary); color: white; }
-        .sidebar-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
+        body, html { height: 100%; margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; overflow: hidden; }
 
-        /* Map Styling */
+        /* --- SIDEBAR STRUCTURE --- */
+        #sidebar {
+            width: 320px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            z-index: 1001;
+        }
+
+        /* Branding */
+        .sidebar-header { padding: 25px 20px; display: flex; align-items: center; gap: 12px; }
+        .nav-logo { width: 45px; height: auto; }
+        .header-text h2 { margin: 0; font-size: 20px; color: var(--text-main); }
+        .header-text p { margin: 0; font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Navigation Menu */
+        .sidebar-nav { padding: 10px; }
+        .nav-item {
+            display: flex; align-items: center; padding: 12px 15px;
+            text-decoration: none; color: var(--text-main); font-weight: 500;
+            border-radius: 8px; margin-bottom: 4px; transition: 0.2s; cursor: pointer;
+        }
+        .nav-item:hover { background: var(--primary-light); color: var(--primary); }
+        .nav-item.active { background: var(--primary); color: white; }
+        .nav-item .icon { margin-right: 12px; font-size: 18px; }
+
+        /* Dynamic Content Area */
+        .sidebar-content {
+            flex-grow: 1; padding: 20px; border-top: 1px solid var(--border);
+            overflow-y: auto; background-color: #fafafa;
+        }
+
+        /* Footer / Account Section */
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); background: #fff; }
+        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .user-avatar { 
+            width: 38px; height: 38px; background: var(--primary); 
+            color: white; border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; font-weight: bold;
+        }
+        .user-details p { margin: 0; font-size: 14px; font-weight: 600; }
+        .user-details span { font-size: 11px; color: var(--text-sub); }
+        
+        .logout-btn {
+            width: 100%; padding: 8px; background: none; border: 1px solid #ddd;
+            border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.3s;
+        }
+        .logout-btn:hover { color: #e74c3c; border-color: #ffcccc; background: #fff5f5; }
+
+        /* --- MAP SECTION --- */
         #map { flex-grow: 1; height: 100vh; }
 
-        /* Form Styling */
-        .report-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        select, textarea, .btn-report { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
-        
-        .btn-report { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        .btn-report:hover { background: #5d2e0d; }
-
-        #logout-btn { color: #fff; text-decoration: underline; cursor: pointer; font-size: 12px; margin-top: 10px; display: block; }
+        /* Reusable UI Components for Sidebar Views */
+        .view-title { font-size: 18px; margin-bottom: 15px; color: var(--text-main); }
+        .report-form input, .report-form select, .report-form textarea {
+            width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;
+            border-radius: 6px; box-sizing: border-box; font-family: inherit;
+        }
+        .btn-submit {
+            width: 100%; padding: 12px; background: var(--primary); color: white;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="sidebar">
+    <aside id="sidebar">
         <div class="sidebar-header">
-            <h3>Tagbi GeoGuard</h3>
-            <span id="user-display">Loading user...</span>
-            <a id="logout-btn" onclick="logout()">Sign Out</a>
+            <img src="logo.png" alt="GeoGuard Logo" class="nav-logo">
+            <div class="header-text">
+                <h2>GeoGuard</h2>
+                <p>Tagbilaran City</p>
+            </div>
         </div>
-        
-        <div class="sidebar-content">
-            <h4>Report a Hazard</h4>
-            <div class="report-box">
-                <p style="font-size: 12px; color: #666;">Current Location: <span id="coords">Detecting...</span></p>
-                <form id="hazardForm">
-                    <select id="hazardType" required>
-                        <option value="">Select Hazard Type</option>
-                        <option value="Flood">Flood</option>
-                        <option value="Road Block">Road Block</option>
-                        <option value="Fire">Fire Hazard</option>
-                        <option value="Heritage Damage">Heritage Site Damage</option>
-                    </select>
-                    <textarea id="description" placeholder="Describe the situation..." rows="3" required></textarea>
-                    <button type="submit" class="btn-report" id="submitReport">SUBMIT REPORT</button>
-                </form>
+
+        <nav class="sidebar-nav">
+            <div class="nav-item active" onclick="switchView('center', this)">
+                <span class="icon">📡</span> Command Center
+            </div>
+            <div class="nav-item" onclick="switchView('reports', this)">
+                <span class="icon">⚠️</span> Active Reports
+            </div>
+            <div class="nav-item" onclick="switchView('heritage', this)">
+                <span class="icon">🏛️</span> Heritage Sites
+            </div>
+            <div class="nav-item" onclick="switchView('risk', this)">
+                <span class="icon">📊</span> Risk Analysis
+            </div>
+        </nav>
+
+        <div class="sidebar-content" id="sidebarView">
             </div>
 
-            <hr>
-            <h4>Recent Alerts</h4>
-            <div id="hazardList" style="font-size: 13px;">
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar" id="userInitial">U</div>
+                <div class="user-details">
+                    <p id="userNameDisplay">@User</p>
+                    <span>Verified Responder</span>
                 </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Sign Out</button>
         </div>
-    </div>
+    </aside>
 
-    <div id="map"></div>
+    <main id="map"></main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. Initialize Map centered on Tagbilaran City
-        const map = L.map('map').setView([9.6412, 123.8566], 14);
+        // --- 1. INITIALIZE MAP ---
+        const map = L.map('map').setView([9.6412, 123.8566], 14); // Tagbilaran Center
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 2. Get User Location
-        let currentPos = { lat: 9.6412, lng: 123.8566 };
+        let currentCoords = { lat: 9.6412, lng: 123.8566 };
+
+        // Get GPS Location
         navigator.geolocation.getCurrentPosition(pos => {
-            currentPos.lat = pos.coords.latitude;
-            currentPos.lng = pos.coords.longitude;
-            document.getElementById('coords').innerText = `${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)}`;
-            map.setView([currentPos.lat, currentPos.lng], 16);
-            L.marker([currentPos.lat, currentPos.lng]).addTo(map).bindPopup("You are here").openPopup();
+            currentCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            map.setView([currentCoords.lat, currentCoords.lng], 16);
+            L.marker([currentCoords.lat, currentCoords.lng]).addTo(map).bindPopup("Your Location").openPopup();
         });
 
-        // 3. Handle Logout
-        function logout() {
-            window.location.href = 'index.html';
+        // --- 2. VIEW SWITCHING LOGIC ---
+        function switchView(viewName, element) {
+            // Update Active Class
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            element.classList.add('active');
+
+            const container = document.getElementById('sidebarView');
+            
+            if (viewName === 'center') {
+                container.innerHTML = `
+                    <h3 class="view-title">New Hazard Report</h3>
+                    <form class="report-form" id="hazardForm">
+                        <select id="hType" required>
+                            <option value="">Select Hazard Type</option>
+                            <option value="Flood">Flood</option>
+                            <option value="Road Block">Road Block</option>
+                            <option value="Heritage Damage">Heritage Site Damage</option>
+                        </select>
+                        <textarea id="hDesc" placeholder="Describe the hazard..." rows="4" required></textarea>
+                        <button type="submit" class="btn-submit" id="hBtn">SUBMIT TO CLOUD</button>
+                    </form>
+                `;
+                setupFormListener(); // Re-attach listener to new HTML
+            } 
+            else if (viewName === 'reports') {
+                container.innerHTML = `<h3 class="view-title">Active Alerts</h3><div id="reportList">Loading reports...</div>`;
+                // Function to fetch and display reports would go here
+            }
+            else {
+                container.innerHTML = `<h3 class="view-title">Feature Coming Soon</h3><p>Integrating data for ${viewName}...</p>`;
+            }
         }
 
-        // 4. Submit Hazard to MongoDB (You'll need a route in server.js for this!)
-        document.getElementById('hazardForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitReport');
-    btn.innerText = "Uploading to Cloud...";
-    btn.disabled = true;
+        // --- 3. FORM SUBMISSION ---
+        function setupFormListener() {
+            const form = document.getElementById('hazardForm');
+            if(!form) return;
 
-    const reportData = {
-        type: document.getElementById('hazardType').value,
-        description: document.getElementById('description').value,
-        lat: currentPos.lat,
-        lng: currentPos.lng
-    };
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('hBtn');
+                btn.innerText = "Syncing...";
+                btn.disabled = true;
 
-    try {
-        const response = await fetch('/api/report-hazard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportData)
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            alert("Report Secured in MongoDB!"); // Or use your showMessage logic
-            // Add a red marker to the map immediately
-            L.marker([reportData.lat, reportData.lng]).addTo(map)
-                .bindPopup(`<b>${reportData.type}</b><br>${reportData.description}`)
-                .openPopup();
+                const data = {
+                    type: document.getElementById('hType').value,
+                    description: document.getElementById('hDesc').value,
+                    lat: currentCoords.lat,
+                    lng: currentCoords.lng
+                };
+
+                try {
+                    const res = await fetch('/api/report-hazard', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        alert("Report Live in MongoDB!");
+                        L.circle([data.lat, data.lng], {color: 'red', radius: 50}).addTo(map);
+                        form.reset();
+                    }
+                } catch (err) { alert("Error connecting to server."); }
                 
-            document.getElementById('hazardForm').reset();
+                btn.innerText = "SUBMIT TO CLOUD";
+                btn.disabled = false;
+            });
         }
-    } catch (err) {
-        alert("Connection failed.");
-    } finally {
-        btn.innerText = "SUBMIT REPORT";
-        btn.disabled = false;
-    }
-});
+
+        // --- 4. AUTH & SESSION ---
+        function logout() { window.location.href = 'index.html'; }
+
+        // Initial Load
+        window.onload = () => {
+            switchView('center', document.querySelector('.nav-item'));
+            // Optional: Fetch actual username from session/localStorage
+            const name = "Thomas Edison"; 
+            document.getElementById('userNameDisplay').innerText = `@${name.replace(/\s/g, '').toLowerCase()}`;
+            document.getElementById('userInitial').innerText = name[0];
+        };
     </script>
 </body>
 </html>
