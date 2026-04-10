@@ -74,8 +74,6 @@ const hazardSchema = new mongoose.Schema({
 
 const Hazard = mongoose.model('Hazard', hazardSchema);
 
-const mongoose = require('mongoose');
-
 const heritageSiteSchema = new mongoose.Schema({
     name: { 
         type: String, 
