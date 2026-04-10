@@ -276,13 +276,27 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Submitting...";
 
-            const payload = {
-                type: document.getElementById('fType').value,
-                description: `[${document.getElementById('fTitle').value}] ${document.getElementById('fDesc').value}`,
-                lat: 9.6500,
-                lng: 123.8500
-            };
-
+const payload = {
+    title: document.getElementById('fTitle').value,
+    type: document.getElementById('fType').value,
+    severity: document.getElementById('fSeverity').value,
+    description: document.getElementById('fDesc').value,
+    location: {
+        address: document.getElementById('fAddress').value,
+        heritageSite: document.getElementById('fHeritageSite').value,
+        radius: document.getElementById('fRadius').value,
+        lat: 9.6500, // Placeholder for map logic
+        lng: 123.8500
+    },
+    impact: {
+        casualties: document.getElementById('fCasualties').value,
+        damage: document.getElementById('fDamage').value
+    },
+    reporter: {
+        name: document.getElementById('fReporterName').value,
+        contact: document.getElementById('fReporterContact').value
+    }
+};
             const res = await fetch('/api/report-hazard', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},

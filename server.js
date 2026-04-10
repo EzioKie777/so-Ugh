@@ -47,12 +47,29 @@ app.post('/api/login', async (req, res) => {
 });
 
 // --- NEW: Hazard Schema ---
+// Example MongoDB Schema (Mongoose)
 const hazardSchema = new mongoose.Schema({
-    type: { type: String, required: true },
-    description: { type: String, required: true },
-    lat: { type: Number, required: true },
-    lng: { type: Number, required: true },
-    timestamp: { type: Date, default: Date.now }
+  title: { type: String, required: true },
+  type: { type: String, enum: ['Flood', 'Fire', 'Earthquake', 'Other'] },
+  severity: { type: String, enum: ['Low', 'Moderate', 'Critical'] },
+  description: String,
+  location: {
+    address: String,
+    lat: Number,
+    lng: Number,
+    heritageSite: String,
+    radius: Number
+  },
+  impact: {
+    casualties: Number,
+    damageEstimate: Number
+  },
+  reporter: {
+    name: String,
+    contact: String
+  },
+  status: { type: String, default: 'Active' },
+  timestamp: { type: Date, default: Date.now }
 });
 
 const Hazard = mongoose.model('Hazard', hazardSchema);
