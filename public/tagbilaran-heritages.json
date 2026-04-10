@@ -1,34 +1,66 @@
 [
   {
-    "name": "Baclayon Church",
-    "location": { "address": "Baclayon, Tagbilaran City" },
-    "coordinates": { "lat": 9.5997, "lng": 123.8473 },
-    "description": "A historic 16th-century stone church known for its preserved religious art.",
-    "image": "",
-    "healthStatus": "Good"
+    "name": "National Museum of the Philippines – Bohol (Old Provincial Capitol)",
+    "location": { "address": "Carlos P. Garcia Avenue, Poblacion II, Tagbilaran City" },
+    "coordinates": { "lat": 9.6439, "lng": 123.8547 },
+    "description": "A Spanish-era tribunal and prison built in 1860, later serving as the Provincial Capitol. It was fully restored after the 2013 earthquake and now houses the province's primary archeological and cultural exhibits.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/National_Museum_Bohol.jpg/640px-National_Museum_Bohol.jpg",
+    "healthStatus": "Restored"
   },
   {
-    "name": "Dauis Church",
-    "location": { "address": "Dauis, Tagbilaran City" },
-    "coordinates": { "lat": 9.6092, "lng": 123.8384 },
-    "description": "One of the oldest churches in Bohol, with a heritage museum and coastal setting.",
-    "image": "",
-    "healthStatus": "Fair"
+    "name": "Cathedral of St. Joseph the Worker",
+    "location": { "address": "Carlos P. Garcia Avenue, Poblacion II, Tagbilaran City" },
+    "coordinates": { "lat": 9.6431, "lng": 123.8541 },
+    "description": "The seat of the Diocese of Tagbilaran. Originally established by Jesuits in 1595, the current coral stone structure dates back to 1855 and features impressive neo-Romanesque interiors and ceiling murals.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Tagbilaran_Cathedral_Bohol.jpg/640px-Tagbilaran_Cathedral_Bohol.jpg",
+    "healthStatus": "Preserved"
   },
   {
-    "name": "Blood Compact Site",
-    "location": { "address": "Barangay Bool, Tagbilaran City" },
-    "coordinates": { "lat": 9.6469, "lng": 123.8540 },
-    "description": "Commemorative site for the historic blood compact between Legazpi and Sikatuna.",
-    "image": "",
-    "healthStatus": "Excellent"
+    "name": "The Blood Compact Shrine (Sandugo)",
+    "location": { "address": "J.P. Rizal St, Brgy. Bool, Tagbilaran City" },
+    "coordinates": { "lat": 9.6297, "lng": 123.8791 },
+    "description": "A bronze monument by National Artist Napoleon Abueva commemorating the 1565 peace treaty between Datu Sikatuna and Miguel López de Legazpi. It is a landmark of international friendship.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Blood_Compact_Monument.jpg/640px-Blood_Compact_Monument.jpg",
+    "healthStatus": "Preserved"
   },
   {
-    "name": "Shrine of Our Lady of Compassion",
-    "location": { "address": "Barangay Bool, Tagbilaran City" },
-    "coordinates": { "lat": 9.6415, "lng": 123.8534 },
-    "description": "A locally revered religious site with cultural importance for the city.",
-    "image": "",
-    "healthStatus": "Good"
-  }
+    "name": "Casa Rocha-Suarez Heritage House",
+    "location": { "address": "Sitio Ubos, Poblacion I, Tagbilaran City" },
+    "coordinates": { "lat": 9.6425, "lng": 123.8519 },
+    "description": "An American-period ancestral house located in the historic Sitio Ubos district. It exemplifies the 'Bahay na Bato' architecture and reflects the city's early 20th-century residential history.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Sitio_Ubos_House.jpg/640px-Sitio_Ubos_House.jpg",
+    "healthStatus": "Adaptive Reuse"
+  },
+  {
+    "name": "President Carlos P. Garcia Heritage House",
+    "location": { "address": "C.P.G. Avenue, Poblacion II, Tagbilaran City" },
+    "coordinates": { "lat": 9.6450, "lng": 123.8561 },
+    "description": "The former residence of the fourth President of the Philippines, Carlos P. Garcia. It now serves as a museum dedicated to his life and the 'Filipino First' policy.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/CPG_Heritage_House.jpg/640px-CPG_Heritage_House.jpg",
+    "healthStatus": "Preserved"
+  },
+  {
+    "name": "Plaza Rizal",
+    "location": { "address": "Poblacion II, Tagbilaran City" },
+    "coordinates": { "lat": 9.6435, "lng": 123.8544 },
+    "description": "The historic central plaza of Tagbilaran, established during the Spanish colonial period to link the cathedral with the provincial capitol. It remains the social and civic center of the city.",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Plaza_Rizal_Tagbilaran.jpg/640px-Plaza_Rizal_Tagbilaran.jpg",
+    "healthStatus": "Maintained"
+  },
+    {
+        "name": "Baclayon Church",
+        "location": { "address": "Baclayon, Bohol (near Tagbilaran City)" },
+        "coordinates": { "lat": 9.5932, "lng": 123.9898 },
+        "description": "One of the oldest churches in the Philippines, built in 1596. It is a UNESCO World Heritage Site candidate and features a museum with religious artifacts.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Baclayon_Church.jpg/640px-Baclayon_Church.jpg",
+        "healthStatus": "Restored"
+    },
+    {   
+        "name":  "Dauis Church",
+        "location": { "address": "Dauis, Bohol (near Tagbilaran City)" },
+        "coordinates": { "lat": 9.5938, "lng": 123.9890 },
+        "description": "A historic church built in the early 18th century, known for its unique architecture and the miraculous image of the Holy Cross. It is a popular pilgrimage site.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Dauis_Church.jpg/640px-Dauis_Church.jpg",
+        "healthStatus": "Preserved"     
+    }
 ]
