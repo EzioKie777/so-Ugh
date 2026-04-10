@@ -137,12 +137,13 @@ app.get('/api/heritage-sites', async (req, res) => {
 // POST: Add a new heritage site
 app.post('/api/heritage-sites', async (req, res) => {
     try {
+        console.log("Incoming Data:", req.body); // Useful for debugging
         const newSite = new HeritageSite(req.body);
         const savedSite = await newSite.save();
         res.status(201).json(savedSite);
     } catch (err) {
+        console.error("Mongoose Save Error:", err.message); // Will show exactly what's wrong
         res.status(400).json({ message: "Failed to create site", error: err.message });
     }
 });
-
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

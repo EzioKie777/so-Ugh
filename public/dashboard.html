@@ -246,51 +246,51 @@
             </div>
         </section>
     </main>
+    
+    <div id="addSiteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center;">
+        <div class="form-card" style="width:500px; max-width:90%; margin:0;">
+            <div class="card-title">Register Heritage Site</div>
+            <form id="addSiteForm">
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>Site Name</label>
+                    <input type="text" id="sName" placeholder="e.g., San Jose Cathedral" required>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" step="any" id="sLat" value="9.6412" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" step="any" id="sLng" value="123.8524" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>Location Description</label>
+                    <input type="text" id="sAddress" placeholder="Barangay, Street">
+                </div>
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label>Initial Health Status</label>
+                    <select id="sStatus">
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-submit">Save Site</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
-        // Function to show the modal
-        function openModal() {
-        document.getElementById('addSiteModal').style.display = 'flex';
-        }
+        // Modal Toggles
+        function openModal() { document.getElementById('addSiteModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('addSiteModal').style.display = 'none'; }
 
-// Function to hide the modal
-function closeModal() {
-    document.getElementById('addSiteModal').style.display = 'none';
-}
-
-// Handle Add Site Submission
-document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const payload = {
-        name: document.getElementById('sName').value,
-        location: document.getElementById('sAddress').value,
-        coordinates: {
-            lat: parseFloat(document.getElementById('sLat').value),
-            lng: parseFloat(document.getElementById('sLng').value)
-        },
-        healthStatus: document.getElementById('sStatus').value
-    };
-
-    try {
-        const res = await fetch('/api/heritage-sites', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            closeModal();
-            document.getElementById('addSiteForm').reset();
-            fetchHeritageSites(); // Refresh the list immediately
-        } else {
-            const err = await res.json();
-            alert("Error: " + err.message);
-        }
-    } catch (err) {
-        alert("Server connection failed.");
-    }
-});
+        // Tab Switching Logic
         function switchTab(viewId, el) {
             if(el) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -304,146 +304,85 @@ document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
             if(viewId === 'heritage') fetchHeritageSites();
         }
 
-        async function fetchReports() {
+        // ADD SITE FORM LOGIC
+        // This MUST come after the HTML form is defined
+        const addSiteForm = document.getElementById('addSiteForm');
+        if (addSiteForm) {
+            addSiteForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const payload = {
+                    name: document.getElementById('sName').value,
+                    location: { address: document.getElementById('sAddress').value },
+                    coordinates: {
+                        lat: parseFloat(document.getElementById('sLat').value),
+                        lng: parseFloat(document.getElementById('sLng').value)
+                    },
+                    healthStatus: document.getElementById('sStatus').value
+                };
+
+                try {
+                    const res = await fetch('/api/heritage-sites', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        closeModal();
+                        addSiteForm.reset();
+                        fetchHeritageSites(); 
+                    } else {
+                        const err = await res.json();
+                        alert("Error: " + err.message);
+                    }
+                } catch (err) {
+                    alert("Server connection failed.");
+                }
+            });
+        }
+
+        // Updated Fetch Logic to handle "healthStatus" badge colors
+        async function fetchHeritageSites() {
             try {
-                const res = await fetch('/api/hazards');
-                const data = await res.json();
+                const res = await fetch('/api/heritage-sites');
+                const sites = await res.json();
+                const grid = document.getElementById('heritage-grid');
                 
-                const tbody = document.getElementById('rt-body');
-                const statActive = document.getElementById('stat-active');
-                
-                statActive.innerText = data.length;
-                
-                if(!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+                if(!sites.length) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:50px; color:#999;">No heritage sites registered.</p>';
                     return;
                 }
 
-                tbody.innerHTML = data.map(h => `
-                    <tr>
-                        <td><strong>${h.title || 'Untitled Report'}</strong></td>
-                        <td>${h.type}</td>
-                        <td><span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">${h.severity || 'Moderate'}</span></td>
-                        <td>${new Date(h.timestamp).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</td>
-                        <td><button style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">View Details</button></td>
-                    </tr>
-                `).join('');
+                grid.innerHTML = sites.map(site => {
+                    // Logic to color badge based on healthStatus
+                    const statusClass = (site.healthStatus === 'Excellent' || site.healthStatus === 'Good') ? 'badge-low' : 'badge-moderate';
+                    return `
+                    <div class="form-card" style="margin-bottom:0; padding:0; overflow:hidden;">
+                        <div style="height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; color:#999;">
+                            ${site.image ? `<img src="${site.image}" style="width:100%; height:100%; object-fit:cover;">` : '🏛️'}
+                        </div>
+                        <div style="padding:20px;">
+                            <h3 style="margin:0 0 5px 0; color:var(--text-dark);">${site.name}</h3>
+                            <p style="margin:0 0 15px 0; font-size:12px; color:var(--text-grey);">${site.location?.address || 'No location set'}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="badge ${statusClass}">${site.healthStatus}</span>
+                                <button style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer;">Manage</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
             } catch (err) {
-                console.error("Fetch error:", err);
+                console.error("Error fetching sites:", err);
             }
         }
-        
-        async function fetchHeritageSites() {
-    try {
-        const res = await fetch('/api/heritage-sites');
-        const sites = await res.json();
-        
-        const grid = document.getElementById('heritage-grid');
-        
-        if(!sites.length) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:50px; color:#999;">No heritage sites registered.</p>';
-            return;
-        }
 
-        grid.innerHTML = sites.map(site => `
-            <div class="form-card" style="margin-bottom:0; padding:0; overflow:hidden;">
-                <div style="height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; color:#999;">
-                    ${site.image ? `<img src="${site.image}" style="width:100%; height:100%; object-fit:cover;">` : 'No Image'}
-                </div>
-                <div style="padding:20px;">
-                    <h3 style="margin:0 0 5px 0; color:var(--text-dark);">${site.name}</h3>
-                    <p style="margin:0 0 15px 0; font-size:12px; color:var(--text-grey);">${site.location}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="badge" style="background:${site.status === 'Safe' ? '#e7f7ed' : '#fdeaea'}; color:${site.status === 'Safe' ? 'var(--success)' : 'var(--danger)'};">
-                            ${site.status}
-                        </span>
-                        <button style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer;">Manage</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error("Error fetching sites:", err);
-    }
-}
-
-        document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-
-            // Updated Payload keys to match Mongoose schema (Fixes ValidationError)
-            const payload = {
-                title: document.getElementById('fTitle').value,
-                type: document.getElementById('fType').value,
-                severity: document.getElementById('fSeverity').value,
-                description: document.getElementById('fDesc').value,
-                lat: 9.6500, // Static for now
-                lng: 123.8500
-            };
-
-            try {
-                const res = await fetch('/api/report-hazard', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-
-                if(res.ok) {
-                    document.getElementById('fullReportForm').reset();
-                    switchTab('reports');
-                } else {
-                    const errData = await res.json();
-                    alert("Error: " + (errData.message || "Could not save report."));
-                }
-            } catch (err) {
-                alert("Server Connection Failed.");
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
-
-        window.onload = fetchReports;
+        // Initial Load
+        window.onload = () => {
+            fetchReports();
+            fetchHeritageSites();
+        };
     </script>
-    <div id="addSiteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center;">
-    <div class="form-card" style="width:500px; max-width:90%; margin:0;">
-        <div class="card-title">Register Heritage Site</div>
-        <form id="addSiteForm">
-            <div class="form-group" style="margin-bottom:15px;">
-                <label>Site Name</label>
-                <input type="text" id="sName" placeholder="e.g., San Jose Cathedral" required>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Latitude</label>
-                    <input type="number" step="any" id="sLat" value="9.6412" required>
-                </div>
-                <div class="form-group">
-                    <label>Longitude</label>
-                    <input type="number" step="any" id="sLng" value="123.8524" required>
-                </div>
-            </div>
-            <div class="form-group" style="margin-bottom:15px;">
-                <label>Location Description</label>
-                <input type="text" id="sAddress" placeholder="Barangay, Street">
-            </div>
-            <div class="form-group" style="margin-bottom:20px;">
-                <label>Initial Health Status</label>
-                <select id="sStatus">
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
-                </select>
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn btn-submit">Save Site</button>
-            </div>
-        </form>
-    </div>
-</div>
+    
 </body>
 </html>
