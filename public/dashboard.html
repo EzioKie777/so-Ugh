@@ -341,7 +341,48 @@
                 }
             });
         }
+        
+        async function fetchReports() {
+    try {
+        const res = await fetch('/api/hazards');
+        const data = await res.json();
+        
+        const tbody = document.getElementById('rt-body');
+        const statActive = document.getElementById('stat-active');
+        
+        // Update the "Active Hazards" counter
+        statActive.innerText = data.length;
+        
+        if(!data.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+            return;
+        }
 
+        tbody.innerHTML = data.map(h => `
+            <tr>
+                <td>
+                    <strong>${h.title || 'Untitled Report'}</strong><br>
+                    <small style="color:var(--text-grey)">${h.location?.address || 'No address provided'}</small>
+                </td>
+                <td>${h.type || 'Other'}</td>
+                <td>
+                    <span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">
+                        ${h.severity || 'Moderate'}
+                    </span>
+                </td>
+                <td>${new Date(h.timestamp).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</td>
+                <td>
+                    <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
+                        View Details
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById('rt-body').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
+    }
+}
         // Updated Fetch Logic to handle "healthStatus" badge colors
         async function fetchHeritageSites() {
             try {
