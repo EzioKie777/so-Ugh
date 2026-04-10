@@ -370,6 +370,49 @@
             });
         }
         
+        // NEW HAZARD REPORT FORM LOGIC
+        // Add this after the addSiteForm logic
+        const fullReportForm = document.getElementById('fullReportForm');
+        if (fullReportForm) {
+            fullReportForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const payload = {
+                    title: document.getElementById('fTitle').value,
+                    type: document.getElementById('fType').value,
+                    severity: document.getElementById('fSeverity').value,
+                    description: document.getElementById('fDesc').value,
+                    location: {
+                        address: document.getElementById('fAddress').value,
+                        heritageSite: document.getElementById('fHeritageSite').value
+                    },
+                    // Note: Coordinates are not captured from the map placeholder (it's static).
+                    // If you implement interactive map pinning, add lat/lng here.
+                    timestamp: new Date().toISOString()
+                };
+
+                try {
+                    const res = await fetch('/api/hazards', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        // Reset form and switch back to reports view, then refresh
+                        fullReportForm.reset();
+                        switchTab('reports');
+                        fetchReports();
+                    } else {
+                        const err = await res.json();
+                        alert("Error submitting report: " + err.message);
+                    }
+                } catch (err) {
+                    alert("Server connection failed. Please try again.");
+                }
+            });
+        }
+
         async function fetchReports() {
     try {
         const res = await fetch('/api/hazards');
@@ -412,52 +455,6 @@
     }
 }
 
-document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    
-    // Disable button to prevent double-submission
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Sending...";
-
-    const formData = {
-        title: document.getElementById('fTitle').value,
-        type: document.getElementById('fType').value,
-        severity: document.getElementById('fSeverity').value,
-        description: document.getElementById('fDesc').value,
-        location: {
-            address: document.getElementById('fAddress').value,
-            heritageSite: document.getElementById('fHeritageSite').value,
-            // Add lat/lng here if you have your map picker working
-            lat: 9.6407, 
-            lng: 123.8547
-        }
-    };
-
-    try {
-        const response = await fetch('/api/hazards', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        if (response.ok) {
-            alert("Report submitted successfully!");
-            document.getElementById('fullReportForm').reset();
-            switchTab('reports'); // Go back to the list and refresh
-        } else {
-            const err = await response.json();
-            alert("Error: " + err.message);
-        }
-    } catch (error) {
-        console.error("Submission error:", error);
-        alert("Server connection failed.");
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Official Report";
-    }
-});
-
 
 
 
@@ -495,58 +492,6 @@ document.getElementById('fullReportForm').addEventListener('submit', async (e) =
                 console.error("Error fetching sites:", err);
             }
         }
-
-        /*async function loadHazardTrends() {
-        const chart = document.getElementById('trends-chart');
-    
-        try {
-        const response = await fetch('/api/analytics');
-        const data = await response.json();
-        const trends = data.trends; // Extract the trends array
-
-        chart.innerHTML = '';
-
-        if (!trends || trends.length === 0) {
-            chart.innerHTML = '<p style="font-size: 12px; color: #888;">No data for the last 7 days</p>';
-            return;
-        }
-
-        const maxCount = Math.max(...trends.map(t => t.count));
-
-        trends.forEach(item => {
-            const barContainer = document.createElement('div');
-            barContainer.className = "trend-bar-container";
-            barContainer.style.cssText = "flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;";
-
-            const bar = document.createElement('div');
-            const height = (item.count / maxCount) * 100;
-            
-            // Format the date (showing just the day name or MM/DD)
-            const dateObj = new Date(item._id);
-            const dateLabel = dateObj.toLocaleDateString(undefined, { weekday: 'short' });
-
-            bar.style.cssText = `
-                width: 80%;
-                background: linear-gradient(to top, #ef4444, #f87171);
-                height: ${height}%;
-                border-radius: 4px 4px 0 0;
-                transition: height 0.8s ease;
-            `;
-            bar.title = `${item.count} Hazards on ${item._id}`;
-
-            const label = document.createElement('span');
-            label.innerText = dateLabel;
-            label.style.cssText = "font-size: 10px; margin-top: 4px; color: #64748b;";
-
-            barContainer.appendChild(bar);
-            barContainer.appendChild(label);
-            chart.appendChild(barContainer);
-        });
-    } catch (err) {
-        console.error("Failed to load trends:", err);
-        chart.innerText = "Error loading trends.";
-    }
-        }*/
 
         async function syncTrendsWithMongo() {
     const chart = document.getElementById('trends-chart');
