@@ -75,15 +75,15 @@ const hazardSchema = new mongoose.Schema({
 const Hazard = mongoose.model('Hazard', hazardSchema);
 
 // --- NEW: Route to Save a Hazard ---
+// Example of how your server.js should handle the POST
 app.post('/api/report-hazard', async (req, res) => {
     try {
-        const { type, description, lat, lng } = req.body;
-        const newHazard = new Hazard({ type, description, lat, lng });
+        const newHazard = new Hazard(req.body); // req.body now contains 'title'
         await newHazard.save();
-        res.json({ success: true, message: "Hazard reported successfully!" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Failed to save report." });
+        res.status(201).json(newHazard);
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(err.message);
     }
 });
 

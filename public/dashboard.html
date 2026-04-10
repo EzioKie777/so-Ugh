@@ -277,17 +277,13 @@
             btn.innerText = "Submitting...";
 
 const payload = {
-    title: document.getElementById('fTitle').value,
+    title: document.getElementById('fTitle').value, // This fixes the 'required' error
     type: document.getElementById('fType').value,
     severity: document.getElementById('fSeverity').value,
     description: document.getElementById('fDesc').value,
-    location: {
-        address: document.getElementById('fAddress').value,
-        heritageSite: document.getElementById('fHeritageSite').value,
-        radius: document.getElementById('fRadius').value,
-        lat: 9.6500, // Placeholder for map logic
-        lng: 123.8500
-    },
+    lat: 9.6500,
+    lng: 123.8500
+};
     impact: {
         casualties: document.getElementById('fCasualties').value,
         damage: document.getElementById('fDamage').value
