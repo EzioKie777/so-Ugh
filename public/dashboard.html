@@ -15,6 +15,8 @@
             --border: #e2e2e2;
             --accent: #8b6b43;
             --danger: #e74c3c;
+            --safe: #27ae60;
+            --warning: #e67e22;
         }
 
         body, html { height: 100%; width: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; background-color: var(--main-bg); }
@@ -41,31 +43,26 @@
         .view-header h1 { margin: 0; font-size: 32px; color: var(--text-dark); font-weight: 700; }
         .view-header p { margin: 8px 0 0 0; color: var(--text-grey); font-size: 16px; }
 
-        /* --- FORM STYLING (Matching your image) --- */
+        /* --- CARDS & FORMS --- */
         .form-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .card-title { font-size: 18px; font-weight: 600; color: var(--text-dark); margin: 0 0 20px 0; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
-        
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; gap: 8px; }
         label { font-size: 13px; font-weight: 600; color: var(--text-dark); }
         input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; background: #fff; }
-        textarea { resize: vertical; }
 
-        /* Map Placeholder */
-        .map-placeholder { background: #f9f7f2; border: 1px solid #e0dcd0; height: 350px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-top: 10px; }
-        .map-overlay-text { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: var(--text-grey); }
+        /* --- HERITAGE SPECIFIC --- */
+        .heritage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .status-badge { position: absolute; top: 15px; right: 15px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.9); }
 
-        /* Footer Buttons */
-        .form-footer { display: flex; justify-content: flex-end; gap: 15px; padding: 20px 0 50px 0; }
-        .btn-cancel { background: #e0e0e0; color: #555; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        /* --- BUTTONS --- */
         .btn-submit { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-
+        .btn-secondary { background: none; border: 1px solid var(--border); padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; width: 100%; margin-top: 15px; }
+        
         /* --- TABLES --- */
         .table-box { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-        .filter-bar { padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
-        .search-in { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #f9f9f9; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 20px; background: #fafafa; border-bottom: 1px solid var(--border); color: var(--text-grey); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        th { text-align: left; padding: 15px 20px; background: #fafafa; border-bottom: 1px solid var(--border); color: var(--text-grey); font-size: 11px; text-transform: uppercase; }
         td { padding: 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
     </style>
 </head>
@@ -87,12 +84,16 @@
             <div class="nav-item" onclick="switchTab('reports', this)">
                 <span class="icon">📄</span> Active Reports
             </div>
-            <div class="nav-item"><span class="icon">🏛️</span> Heritage Sites</div>
-            <div class="nav-item"><span class="icon">📊</span> Risk Analysis</div>
+            <div class="nav-item" onclick="switchTab('heritage', this)">
+                <span class="icon">🏛️</span> Heritage Sites
+            </div>
+            <div class="nav-item" onclick="switchTab('risk', this)">
+                <span class="icon">📊</span> Risk Analysis
+            </div>
         </nav>
-        <div class="sidebar-footer" style="padding:25px; border-top:1px solid rgba(255,255,255,0.1)">
+        <div class="sidebar-footer">
             <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:700;">G</div>
+                <div style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center;">G</div>
                 <div>
                     <div style="font-size:14px; font-weight:600;">Gab riel708</div>
                     <div style="font-size:11px; opacity:0.6;">freakless708@gmail.com</div>
@@ -109,196 +110,81 @@
             <div class="view-header"><h1>Command Center</h1></div>
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px;">
                 <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Active Hazards</p><h2 id="stat-active">0</h2></div>
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Affected Sites</p><h2>0</h2></div>
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Resolved</p><h2>0</h2></div>
+                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Affected Heritage Sites</p><h2>0</h2></div>
+                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Resolved This Month</p><h2>0</h2></div>
                 <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Risk Trend</p><h2 style="color:#ddd;">--</h2></div>
             </div>
         </section>
 
         <section id="view-reports" class="view-section">
             <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h1>Active Reports</h1>
-                    <p>Manage and track all hazard reports in Tagbilaran.</p>
-                </div>
+                <div><h1>Active Reports</h1><p>Manage and track all hazard reports in Tagbilaran.</p></div>
                 <button class="btn-submit" onclick="switchTab('new-report')">+ New Report</button>
             </div>
             <div class="table-box">
-                <div class="filter-bar">
-                    <input type="text" class="search-in" placeholder="Search reports...">
-                    <select style="padding:10px; border-radius:8px; border:1px solid var(--border);"><option>All Severities</option></select>
-                </div>
                 <table>
-                    <thead><tr><th>Hazard</th><th>Location</th><th>Date</th><th>Severity</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Hazard</th><th>Location</th><th>Date Reported</th><th>Severity</th><th>Status</th></tr></thead>
                     <tbody id="rt-body"></tbody>
                 </table>
             </div>
         </section>
 
+        <section id="view-heritage" class="view-section">
+            <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div><h1>Heritage Sites Registry</h1><p>Monitor and protect Tagbilaran's cultural treasures.</p></div>
+                <button class="btn-submit">+ Register Site</button>
+            </div>
+            
+            <div class="table-box" style="padding: 20px; margin-bottom: 30px;">
+                <div style="display: flex; gap: 15px;">
+                    <input type="text" class="search-in" placeholder="Search sites by name or category..." style="flex:1;">
+                    <select style="width:180px;"><option>All Categories</option></select>
+                </div>
+            </div>
+
+            <div class="heritage-grid">
+                <div class="form-card" style="padding:0; overflow:hidden;">
+                    <div style="height:160px; background:#e0dcd0; display:flex; align-items:center; justify-content:center; position:relative;">
+                        <span style="font-size:40px;">🏛️</span>
+                        <div class="status-badge" style="color:var(--safe);">SAFE</div>
+                    </div>
+                    <div style="padding:20px;">
+                        <h3 style="margin:0;">Baclayon Church</h3>
+                        <p style="font-size:13px; color:var(--text-grey);">Religious Heritage</p>
+                        <button class="btn-secondary">View Detailed Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="view-new-report" class="view-section">
-    <div class="view-header">
-        <h1>Submit Hazard Report</h1>
-        <p>File a new emergency or hazard report for immediate assessment.</p>
-    </div>
-
-    <form id="fullReportForm">
-        <div class="form-card">
-            <div class="card-title">Incident Details</div>
-            <div class="form-group" style="margin-bottom:20px;">
-                <label>Incident Title</label>
-                <input type="text" id="fTitle" placeholder="e.g. Flooding near Baclayon Church" required>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Hazard Type</label>
-                    <select id="fType">
-                        <option value="Flood">Flood</option>
-                        <option value="Fire">Fire</option>
-                        <option value="Earthquake">Earthquake</option>
-                        <option value="Other">Other</option>
-                    </select>
+            <div class="view-header"><h1>Submit Hazard Report</h1></div>
+            <form id="fullReportForm">
+                <div class="form-card">
+                    <div class="card-title">Incident Details</div>
+                    <div class="form-group"><label>Incident Title</label><input type="text" id="fTitle" required></div>
                 </div>
-                <div class="form-group">
-                    <label>Severity</label>
-                    <select id="fSeverity">
-                        <option value="Low">Low</option>
-                        <option value="Moderate" selected>Moderate</option>
-                        <option value="Critical">Critical</option>
-                    </select>
+                <div class="form-card">
+                    <div class="card-title">Location & Impact</div>
+                    <div class="form-group"><label>Address Description</label><input type="text" id="fAddress"></div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Detailed Description</label>
-                <textarea id="fDesc" rows="4" placeholder="Describe the hazard, visible damage, and immediate risks..."></textarea>
-            </div>
-        </div>
-
-        <div class="form-card">
-            <div class="card-title">Location & Impact</div>
-            <label>Pin Location on Map</label>
-            <div class="map-placeholder">
-                <div style="text-align:center;">
-                    <span style="font-size:30px;">📍</span><br>
-                    <span style="font-size:18px; font-weight:700;">Tagbilaran City</span><br>
-                    <span style="color:var(--text-grey); font-size:13px;">Map Interface Placeholder</span>
+                <div style="display:flex; justify-content:flex-end; gap:15px;">
+                    <button type="button" class="btn-secondary" style="width:auto; margin:0;" onclick="switchTab('reports')">Cancel</button>
+                    <button type="submit" class="btn-submit">Submit Report</button>
                 </div>
-                <div class="map-overlay-text">Lat: 9.65000 Lon: 123.85000</div>
-            </div>
-            <div class="form-group" style="margin-top:20px;">
-                <label>Address / Location Description</label>
-                <input type="text" id="fAddress" placeholder="Street, Barangay, Landmark">
-            </div>
-            <div class="form-grid" style="margin-top:20px;">
-                <div class="form-group">
-                    <label>Affected Heritage Site (Optional)</label>
-                    <select id="fHeritageSite">
-                        <option value="">No specific site</option>
-                        <option value="Baclayon Church">Baclayon Church</option>
-                        <option value="Dauis Church">Dauis Church</option>
-                        </select>
-                </div>
-                <div class="form-group">
-                    <label>Affected Radius (meters)</label>
-                    <input type="number" id="fRadius" value="50">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-card">
-            <div class="card-title">Impact Assessment (Optional)</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Number of Casualties</label>
-                    <input type="number" id="fCasualties" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Est. Property Damage (₱)</label>
-                    <input type="number" id="fDamage" value="0">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-card">
-            <div class="card-title">Reporter Info</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="fReporterName" placeholder="John Doe">
-                </div>
-                <div class="form-group">
-                    <label>Contact Number / Email</label>
-                    <input type="text" id="fReporterContact" placeholder="09123456789">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-footer">
-            <button type="button" class="btn-cancel" onclick="switchTab('reports')">Cancel</button>
-            <button type="submit" class="btn-submit" id="submitBtn">Submit Report</button>
-        </div>
-    </form>
-</section>
+            </form>
+        </section>
     </main>
 
     <script>
         function switchTab(viewId, el) {
-            // Update Sidebar if it was clicked
             if(el) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 el.classList.add('active');
             }
-            
-            // Hide all sections and show target
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
-            
-            if(viewId === 'reports') fetchReports();
         }
-
-        async function fetchReports() {
-            const res = await fetch('/api/hazards');
-            const data = await res.json();
-            const tbody = document.getElementById('rt-body');
-            document.getElementById('stat-active').innerText = data.length;
-            tbody.innerHTML = data.length ? data.map(h => `
-                <tr>
-                    <td><strong>${h.type}</strong></td>
-                    <td>Tagbilaran</td>
-                    <td>${new Date(h.timestamp).toLocaleDateString()}</td>
-                    <td style="color:#e67e22; font-weight:600;">Moderate</td>
-                    <td><span style="background:#eee; padding:4px 12px; border-radius:20px; font-size:12px;">Active</span></td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" style="text-align:center; padding:40px;">No reports found.</td></tr>';
-        }
-
-        document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "Submitting...";
-
-            const payload = {
-                type: document.getElementById('fType').value,
-                description: `[${document.getElementById('fTitle').value}] ${document.getElementById('fDesc').value}`,
-                lat: 9.6500,
-                lng: 123.8500
-            };
-
-            const res = await fetch('/api/report-hazard', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-
-            if(res.ok) {
-                document.getElementById('fullReportForm').reset();
-                switchTab('reports');
-            } else {
-                alert("Error submitting report.");
-            }
-            btn.innerText = "Submit Report";
-        });
-
-        window.onload = () => fetchReports();
     </script>
 </body>
 </html>
