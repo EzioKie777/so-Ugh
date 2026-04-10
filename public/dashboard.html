@@ -240,7 +240,7 @@
                     <h1>Heritage Sites</h1>
                     <p>Monitored cultural landmarks and their current risk status.</p>
                 </div>
-                <button class="btn btn-submit">+ Add Site</button>
+                <button class="btn btn-submit" onclick="openModal()">+ Add Site</button>
             </div>
             <div id="heritage-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
             </div>
@@ -248,6 +248,49 @@
     </main>
 
     <script>
+        // Function to show the modal
+        function openModal() {
+        document.getElementById('addSiteModal').style.display = 'flex';
+        }
+
+// Function to hide the modal
+function closeModal() {
+    document.getElementById('addSiteModal').style.display = 'none';
+}
+
+// Handle Add Site Submission
+document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const payload = {
+        name: document.getElementById('sName').value,
+        location: document.getElementById('sAddress').value,
+        coordinates: {
+            lat: parseFloat(document.getElementById('sLat').value),
+            lng: parseFloat(document.getElementById('sLng').value)
+        },
+        healthStatus: document.getElementById('sStatus').value
+    };
+
+    try {
+        const res = await fetch('/api/heritage-sites', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            closeModal();
+            document.getElementById('addSiteForm').reset();
+            fetchHeritageSites(); // Refresh the list immediately
+        } else {
+            const err = await res.json();
+            alert("Error: " + err.message);
+        }
+    } catch (err) {
+        alert("Server connection failed.");
+    }
+});
         function switchTab(viewId, el) {
             if(el) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -365,5 +408,42 @@
 
         window.onload = fetchReports;
     </script>
+    <div id="addSiteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center;">
+    <div class="form-card" style="width:500px; max-width:90%; margin:0;">
+        <div class="card-title">Register Heritage Site</div>
+        <form id="addSiteForm">
+            <div class="form-group" style="margin-bottom:15px;">
+                <label>Site Name</label>
+                <input type="text" id="sName" placeholder="e.g., San Jose Cathedral" required>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Latitude</label>
+                    <input type="number" step="any" id="sLat" value="9.6412" required>
+                </div>
+                <div class="form-group">
+                    <label>Longitude</label>
+                    <input type="number" step="any" id="sLng" value="123.8524" required>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:15px;">
+                <label>Location Description</label>
+                <input type="text" id="sAddress" placeholder="Barangay, Street">
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label>Initial Health Status</label>
+                <select id="sStatus">
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                </select>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Save Site</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
