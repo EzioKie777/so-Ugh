@@ -1,0 +1,20 @@
+[
+  {
+    "id": "site_001",
+    "name": "Baclayon Church",
+    "formalName": "La Purisima Concepcion de la Virgen Maria Parish",
+    "category": "Religious",
+    "barangay": "Poblacion",
+    "status": "Safe",
+    "icon": "🏛️"
+  },
+  {
+    "id": "site_002",
+    "name": "Dauis Church",
+    "formalName": "Our Lady of the Assumption Parish",
+    "category": "Religious",
+    "barangay": "Poblacion",
+    "status": "Safe",
+    "icon": "⛪"
+  }
+]
