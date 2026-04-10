@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Baclayon Church",
+    "location": { "address": "Baclayon, Tagbilaran City" },
+    "coordinates": { "lat": 9.5997, "lng": 123.8473 },
+    "description": "A historic 16th-century stone church known for its preserved religious art.",
+    "image": "",
+    "healthStatus": "Good"
+  },
+  {
+    "name": "Dauis Church",
+    "location": { "address": "Dauis, Tagbilaran City" },
+    "coordinates": { "lat": 9.6092, "lng": 123.8384 },
+    "description": "One of the oldest churches in Bohol, with a heritage museum and coastal setting.",
+    "image": "",
+    "healthStatus": "Fair"
+  },
+  {
+    "name": "Blood Compact Site",
+    "location": { "address": "Barangay Bool, Tagbilaran City" },
+    "coordinates": { "lat": 9.6469, "lng": 123.8540 },
+    "description": "Commemorative site for the historic blood compact between Legazpi and Sikatuna.",
+    "image": "",
+    "healthStatus": "Excellent"
+  },
+  {
+    "name": "Shrine of Our Lady of Compassion",
+    "location": { "address": "Barangay Bool, Tagbilaran City" },
+    "coordinates": { "lat": 9.6415, "lng": 123.8534 },
+    "description": "A locally revered religious site with cultural importance for the city.",
+    "image": "",
+    "healthStatus": "Good"
+  }
+]

@@ -47,7 +47,6 @@ app.post('/api/login', async (req, res) => {
 });
 
 // --- NEW: Hazard Schema ---
-// Example MongoDB Schema (Mongoose)
 const hazardSchema = new mongoose.Schema({
   title: { type: String, required: true },
   type: { type: String, enum: ['Flood', 'Fire', 'Earthquake', 'Other'] },
@@ -74,38 +73,10 @@ const hazardSchema = new mongoose.Schema({
 
 const Hazard = mongoose.model('Hazard', hazardSchema);
 
-const heritageSiteSchema = new mongoose.Schema({
-    name: { 
-        type: String, 
-        required: true,
-        unique: true 
-    },
-    location: {
-        address: String,
-        barangay: String
-    },
-    coordinates: {
-        lat: { type: Number, required: true },
-        lng: { type: Number, required: true }
-    },
-    description: String,
-    image: String, // URL to a photo of the site
-    healthStatus: {
-        type: String,
-        enum: ['Excellent', 'Good', 'Fair', 'Poor', 'Critical'],
-        default: 'Excellent'
-    },
-    establishedYear: Number,
-    lastInspected: { type: Date, default: Date.now }
-});
-
-const HeritageSite = mongoose.model('HeritageSite', heritageSiteSchema);
-
 // --- NEW: Route to Save a Hazard ---
-// Example of how your server.js should handle the POST
 app.post('/api/report-hazard', async (req, res) => {
     try {
-        const newHazard = new Hazard(req.body); // req.body now contains 'title'
+        const newHazard = new Hazard(req.body);
         await newHazard.save();
         res.status(201).json(newHazard);
     } catch (err) {
@@ -124,47 +95,21 @@ app.get('/api/hazards', async (req, res) => {
     }
 });
 
-// GET: Fetch all heritage sites
-app.get('/api/heritage-sites', async (req, res) => {
-    try {
-        const sites = await HeritageSite.find().sort({ name: 1 });
-        res.json(sites);
-    } catch (err) {
-        res.status(500).json({ message: "Error retrieving sites", error: err.message });
-    }
-});
-
-// POST: Add a new heritage site
-app.post('/api/heritage-sites', async (req, res) => {
-    try {
-        console.log("Incoming Data:", req.body); // Useful for debugging
-        const newSite = new HeritageSite(req.body);
-        const savedSite = await newSite.save();
-        res.status(201).json(savedSite);
-    } catch (err) {
-        console.error("Mongoose Save Error:", err.message); // Will show exactly what's wrong
-        res.status(400).json({ message: "Failed to create site", error: err.message });
-    }
-});
-
 // GET: Aggregated Trends and Analytics
 app.get('/api/analytics', async (req, res) => {
     try {
         const total = await Hazard.countDocuments();
         
-        // 1. Severity Distribution
         const severityDist = await Hazard.aggregate([
             { $group: { _id: "$severity", count: { $sum: 1 } } }
         ]);
 
-        // 2. Top Vulnerable Sites (Grouped by Address/Location)
         const topSites = await Hazard.aggregate([
             { $group: { _id: "$location.address", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 5 }
         ]);
 
-        // 3. Trends Over Time (Reports per Day for the last 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
@@ -182,4 +127,5 @@ app.get('/api/analytics', async (req, res) => {
         res.status(500).json({ message: "Error fetching analytics" });
     }
 });
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
