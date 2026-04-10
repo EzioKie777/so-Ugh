@@ -15,300 +15,307 @@
             --border: #e2e2e2;
             --accent: #8b6b43;
             --danger: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
         }
 
-        body, html { height: 100%; width: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; background-color: var(--main-bg); }
+        body, html { height: 100%; width: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; overflow: hidden; background-color: var(--main-bg); }
 
         /* --- SIDEBAR --- */
-        #sidebar { width: 320px; min-width: 320px; height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; color: var(--sidebar-text); z-index: 10; }
-        .sidebar-header { padding: 30px 20px; display: flex; align-items: center; gap: 15px; }
-        .nav-logo { width: 45px; height: auto; }
-        .sidebar-nav { padding: 20px 10px; flex-grow: 1; }
-        .nav-label { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.4); padding-left: 15px; margin-bottom: 12px; font-weight: 600; }
-        .nav-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; color: #fff; font-size: 15px; transition: 0.2s; text-decoration: none; }
-        .nav-item:hover { background: rgba(255,255,255,0.1); }
-        .nav-item.active { background: rgba(255,255,255,0.15); font-weight: 600; }
-        .nav-item .icon { margin-right: 15px; font-size: 20px; }
-        .sidebar-footer { padding: 25px; border-top: 1px solid rgba(255,255,255,0.05); }
+        #sidebar { width: 300px; min-width: 300px; height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; color: var(--sidebar-text); z-index: 10; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 30px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-logo { width: 40px; height: auto; border-radius: 4px; }
+        .sidebar-nav { padding: 20px 15px; flex-grow: 1; }
+        .nav-label { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.4); padding-left: 15px; margin-bottom: 12px; font-weight: 700; letter-spacing: 1px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; color: rgba(255,255,255,0.8); font-size: 14px; transition: all 0.2s; text-decoration: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-item.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; }
+        .nav-item .icon { margin-right: 12px; font-size: 18px; width: 20px; text-align: center; }
 
         /* --- MAIN CONTENT --- */
-        #main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; width: 100%; }
-        .top-breadcrumb { padding: 15px 40px; font-size: 13px; color: var(--text-grey); background: #fff; border-bottom: 1px solid var(--border); box-sizing: border-box; }
+        #main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; position: relative; }
+        .top-breadcrumb { padding: 15px 40px; font-size: 12px; font-weight: 600; color: var(--text-grey); background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
 
-        .view-section { display: none; padding: 40px; width: 100%; box-sizing: border-box; }
-        .view-section.active { display: block; }
-        .view-header { margin-bottom: 30px; }
-        .view-header h1 { margin: 0; font-size: 32px; color: var(--text-dark); font-weight: 700; }
-        .view-header p { margin: 8px 0 0 0; color: var(--text-grey); font-size: 16px; }
+        .view-section { display: none; padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- FORM STYLING (Matching your image) --- */
-        .form-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .card-title { font-size: 18px; font-weight: 600; color: var(--text-dark); margin: 0 0 20px 0; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+        .view-header { margin-bottom: 35px; }
+        .view-header h1 { margin: 0; font-size: 28px; color: var(--text-dark); font-weight: 800; letter-spacing: -0.5px; }
+        .view-header p { margin: 8px 0 0 0; color: var(--text-grey); font-size: 15px; }
+
+        /* --- CARDS & FORMS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .form-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin: 0 0 20px 0; display: flex; align-items: center; gap: 10px; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; gap: 8px; }
-        label { font-size: 13px; font-weight: 600; color: var(--text-dark); }
-        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; background: #fff; }
-        textarea { resize: vertical; }
+        label { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
 
         /* Map Placeholder */
-        .map-placeholder { background: #f9f7f2; border: 1px solid #e0dcd0; height: 350px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-top: 10px; }
-        .map-overlay-text { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: var(--text-grey); }
+        .map-placeholder { background: #eee; border: 2px dashed #ccc; height: 300px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-grey); margin-top: 10px; }
 
-        /* Footer Buttons */
-        .form-footer { display: flex; justify-content: flex-end; gap: 15px; padding: 20px 0 50px 0; }
-        .btn-cancel { background: #e0e0e0; color: #555; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        .btn-submit { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .form-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 10px; padding-bottom: 60px; }
+        .btn { padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; }
+        .btn-cancel { background: #eee; color: #666; }
+        .btn-cancel:hover { background: #e2e2e2; }
+        .btn-submit { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(139, 107, 67, 0.2); }
+        .btn-submit:hover { background: #765a38; transform: translateY(-1px); }
 
-        /* --- TABLES --- */
-        .table-box { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-        .filter-bar { padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
-        .search-in { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #f9f9f9; }
+        /* --- TABLE --- */
+        .table-box { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .filter-bar { padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; background: #fafafa; }
+        .search-in { flex: 1; padding: 10px 15px; border: 1px solid var(--border); border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 20px; background: #fafafa; border-bottom: 1px solid var(--border); color: var(--text-grey); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-        td { padding: 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { text-align: left; padding: 15px 20px; background: #fff; border-bottom: 2px solid var(--main-bg); color: var(--text-grey); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        td { padding: 18px 20px; border-bottom: 1px solid var(--main-bg); font-size: 14px; color: var(--text-dark); }
+        
+        /* Badges */
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-critical { background: #fdeaea; color: var(--danger); }
+        .badge-moderate { background: #fff4e5; color: var(--warning); }
+        .badge-low { background: #e7f7ed; color: var(--success); }
     </style>
 </head>
 <body>
 
     <aside id="sidebar">
         <div class="sidebar-header">
-            <img src="logo.png" class="nav-logo">
+            <div style="background: white; padding: 5px; border-radius: 8px;"><img src="logo.png" class="nav-logo" alt="Logo"></div>
             <div>
-                <h2 style="margin:0; font-size:18px;">Tagbi GeoGuard</h2>
-                <p style="margin:0; font-size:12px; opacity:0.7;">Heritage Protection</p>
+                <h2 style="margin:0; font-size:16px; letter-spacing: 0.5px;">Tagbi GeoGuard</h2>
+                <p style="margin:0; font-size:11px; opacity:0.6; font-weight: 600;">HERITAGE SYSTEM</p>
             </div>
         </div>
         <nav class="sidebar-nav">
-            <div class="nav-label">Operations</div>
+            <div class="nav-label">Management</div>
             <div class="nav-item active" onclick="switchTab('center', this)">
-                <span class="icon">▣</span> Command Center
+                <span class="icon">📊</span> Command Center
             </div>
             <div class="nav-item" onclick="switchTab('reports', this)">
-                <span class="icon">📄</span> Active Reports
+                <span class="icon">📋</span> Active Reports
             </div>
+            <div class="nav-label">Resources</div>
             <div class="nav-item"><span class="icon">🏛️</span> Heritage Sites</div>
-            <div class="nav-item"><span class="icon">📊</span> Risk Analysis</div>
+            <div class="nav-item"><span class="icon">🗺️</span> Risk Mapping</div>
         </nav>
-        <div class="sidebar-footer" style="padding:25px; border-top:1px solid rgba(255,255,255,0.1)">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:700;">G</div>
+        <div class="sidebar-footer">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px;">
+                <div style="width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">G7</div>
                 <div>
-                    <div style="font-size:14px; font-weight:600;">Gab riel708</div>
-                    <div style="font-size:11px; opacity:0.6;">freakless708@gmail.com</div>
+                    <div style="font-size:13px; font-weight:600;">Gabriel708</div>
+                    <div style="font-size:10px; opacity:0.5;">Administrator</div>
                 </div>
             </div>
-            <p onclick="location.href='index.html'" style="cursor:pointer; font-size:13px; margin-top:15px; opacity:0.8;">↳ Sign Out</p>
+            <a href="index.html" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12px; font-weight: 600;">Logout System →</a>
         </div>
     </aside>
 
     <main id="main-content">
-        <div class="top-breadcrumb">▣ Bohol Emergency Management</div>
+        <div class="top-breadcrumb">TAGBILARAN CITY / EMERGENCY OPERATIONS</div>
 
         <section id="view-center" class="view-section active">
-            <div class="view-header"><h1>Command Center</h1></div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px;">
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Active Hazards</p><h2 id="stat-active">0</h2></div>
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Affected Sites</p><h2>0</h2></div>
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Resolved</p><h2>0</h2></div>
-                <div class="form-card"><p style="font-size:14px; color:var(--text-grey);">Risk Trend</p><h2 style="color:#ddd;">--</h2></div>
+            <div class="view-header">
+                <h1>Command Center</h1>
+                <p>Real-time overview of the heritage protection network.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Active Hazards</p><h2 id="stat-active" style="margin:0; font-size:32px;">0</h2></div>
+                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Sites Protected</p><h2 style="margin:0; font-size:32px;">24</h2></div>
+                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Resolved (24h)</p><h2 style="margin:0; font-size:32px; color:var(--success);">3</h2></div>
+                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">System Status</p><h2 style="margin:0; font-size:18px; color:var(--success);">● OPERATIONAL</h2></div>
             </div>
         </section>
 
         <section id="view-reports" class="view-section">
-            <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="view-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
                 <div>
                     <h1>Active Reports</h1>
-                    <p>Manage and track all hazard reports in Tagbilaran.</p>
+                    <p>Live incident feed across the city jurisdiction.</p>
                 </div>
-                <button class="btn-submit" onclick="switchTab('new-report')">+ New Report</button>
+                <button class="btn btn-submit" onclick="switchTab('new-report')">+ New Hazard</button>
             </div>
             <div class="table-box">
                 <div class="filter-bar">
-                    <input type="text" class="search-in" placeholder="Search reports...">
-                    <select style="padding:10px; border-radius:8px; border:1px solid var(--border);"><option>All Severities</option></select>
+                    <input type="text" class="search-in" placeholder="Filter by location or title...">
+                    <select style="padding:10px; border-radius:8px; border:1px solid var(--border); font-size:13px;">
+                        <option>All Types</option>
+                        <option>Flood</option>
+                        <option>Fire</option>
+                        <option>Earthquake</option>
+                    </select>
                 </div>
                 <table>
-                    <thead><tr><th>Hazard</th><th>Location</th><th>Date</th><th>Severity</th><th>Status</th></tr></thead>
-                    <tbody id="rt-body"></tbody>
+                    <thead>
+                        <tr>
+                            <th>Incident Title</th>
+                            <th>Type</th>
+                            <th>Severity</th>
+                            <th>Time Reported</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rt-body">
+                        </tbody>
                 </table>
             </div>
         </section>
 
         <section id="view-new-report" class="view-section">
-    <div class="view-header">
-        <h1>Submit Hazard Report</h1>
-        <p>File a new emergency or hazard report for immediate assessment.</p>
-    </div>
+            <div class="view-header">
+                <h1>New Hazard Report</h1>
+                <p>Provide accurate data for immediate heritage team dispatch.</p>
+            </div>
 
-    <form id="fullReportForm">
-        <div class="form-card">
-            <div class="card-title">Incident Details</div>
-            <div class="form-group" style="margin-bottom:20px;">
-                <label>Incident Title</label>
-                <input type="text" id="fTitle" placeholder="e.g. Flooding near Baclayon Church" required>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Hazard Type</label>
-                    <select id="fType">
-                        <option value="Flood">Flood</option>
-                        <option value="Fire">Fire</option>
-                        <option value="Earthquake">Earthquake</option>
-                        <option value="Other">Other</option>
-                    </select>
+            <form id="fullReportForm">
+                <div class="form-card">
+                    <div class="card-title"><span>🚨</span> Core Information</div>
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label>Incident Title <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="fTitle" placeholder="e.g. Minor Crack on Bell Tower" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Hazard Category</label>
+                            <select id="fType">
+                                <option value="Flood">Flood</option>
+                                <option value="Fire">Fire</option>
+                                <option value="Earthquake">Earthquake</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority Level</label>
+                            <select id="fSeverity">
+                                <option value="Low">Low (Monitoring)</option>
+                                <option value="Moderate" selected>Moderate (Required Action)</option>
+                                <option value="Critical">Critical (Immediate Response)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Situation Assessment</label>
+                        <textarea id="fDesc" rows="4" placeholder="Describe the current status and visible impacts..."></textarea>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Severity</label>
-                    <select id="fSeverity">
-                        <option value="Low">Low</option>
-                        <option value="Moderate" selected>Moderate</option>
-                        <option value="Critical">Critical</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Detailed Description</label>
-                <textarea id="fDesc" rows="4" placeholder="Describe the hazard, visible damage, and immediate risks..."></textarea>
-            </div>
-        </div>
 
-        <div class="form-card">
-            <div class="card-title">Location & Impact</div>
-            <label>Pin Location on Map</label>
-            <div class="map-placeholder">
-                <div style="text-align:center;">
-                    <span style="font-size:30px;">📍</span><br>
-                    <span style="font-size:18px; font-weight:700;">Tagbilaran City</span><br>
-                    <span style="color:var(--text-grey); font-size:13px;">Map Interface Placeholder</span>
+                <div class="form-card">
+                    <div class="card-title"><span>📍</span> Location & Assets</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Barangay / Address</label>
+                            <input type="text" id="fAddress" placeholder="Enter specific location">
+                        </div>
+                        <div class="form-group">
+                            <label>Proximity to Heritage Site</label>
+                            <select id="fHeritageSite">
+                                <option value="">None / Not Applicable</option>
+                                <option value="Baclayon Church">Baclayon Church</option>
+                                <option value="Dauis Church">Dauis Church</option>
+                                <option value="Blood Compact Site">Blood Compact Site</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="map-placeholder">
+                        <span style="font-size: 40px; margin-bottom: 10px;">📍</span>
+                        <p style="margin:0; font-weight: 700;">Interactive Map View</p>
+                        <p style="margin:5px 0 0 0; font-size: 12px; opacity: 0.7;">Click to pin coordinates</p>
+                    </div>
                 </div>
-                <div class="map-overlay-text">Lat: 9.65000 Lon: 123.85000</div>
-            </div>
-            <div class="form-group" style="margin-top:20px;">
-                <label>Address / Location Description</label>
-                <input type="text" id="fAddress" placeholder="Street, Barangay, Landmark">
-            </div>
-            <div class="form-grid" style="margin-top:20px;">
-                <div class="form-group">
-                    <label>Affected Heritage Site (Optional)</label>
-                    <select id="fHeritageSite">
-                        <option value="">No specific site</option>
-                        <option value="Baclayon Church">Baclayon Church</option>
-                        <option value="Dauis Church">Dauis Church</option>
-                        </select>
-                </div>
-                <div class="form-group">
-                    <label>Affected Radius (meters)</label>
-                    <input type="number" id="fRadius" value="50">
-                </div>
-            </div>
-        </div>
 
-        <div class="form-card">
-            <div class="card-title">Impact Assessment (Optional)</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Number of Casualties</label>
-                    <input type="number" id="fCasualties" value="0">
+                <div class="form-footer">
+                    <button type="button" class="btn btn-cancel" onclick="switchTab('reports')">Discard</button>
+                    <button type="submit" class="btn btn-submit" id="submitBtn">Submit Official Report</button>
                 </div>
-                <div class="form-group">
-                    <label>Est. Property Damage (₱)</label>
-                    <input type="number" id="fDamage" value="0">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-card">
-            <div class="card-title">Reporter Info</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="fReporterName" placeholder="John Doe">
-                </div>
-                <div class="form-group">
-                    <label>Contact Number / Email</label>
-                    <input type="text" id="fReporterContact" placeholder="09123456789">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-footer">
-            <button type="button" class="btn-cancel" onclick="switchTab('reports')">Cancel</button>
-            <button type="submit" class="btn-submit" id="submitBtn">Submit Report</button>
-        </div>
-    </form>
-</section>
+            </form>
+        </section>
     </main>
 
     <script>
         function switchTab(viewId, el) {
-            // Update Sidebar if it was clicked
             if(el) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 el.classList.add('active');
             }
-            
-            // Hide all sections and show target
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
+            const target = document.getElementById('view-' + viewId);
+            if(target) target.classList.add('active');
             
-            if(viewId === 'reports') fetchReports();
+            if(viewId === 'reports' || viewId === 'center') fetchReports();
         }
 
         async function fetchReports() {
-            const res = await fetch('/api/hazards');
-            const data = await res.json();
-            const tbody = document.getElementById('rt-body');
-            document.getElementById('stat-active').innerText = data.length;
-            tbody.innerHTML = data.length ? data.map(h => `
-                <tr>
-                    <td><strong>${h.type}</strong></td>
-                    <td>Tagbilaran</td>
-                    <td>${new Date(h.timestamp).toLocaleDateString()}</td>
-                    <td style="color:#e67e22; font-weight:600;">Moderate</td>
-                    <td><span style="background:#eee; padding:4px 12px; border-radius:20px; font-size:12px;">Active</span></td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" style="text-align:center; padding:40px;">No reports found.</td></tr>';
+            try {
+                const res = await fetch('/api/hazards');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('rt-body');
+                const statActive = document.getElementById('stat-active');
+                
+                statActive.innerText = data.length;
+                
+                if(!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(h => `
+                    <tr>
+                        <td><strong>${h.title || 'Untitled Report'}</strong></td>
+                        <td>${h.type}</td>
+                        <td><span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">${h.severity || 'Moderate'}</span></td>
+                        <td>${new Date(h.timestamp).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</td>
+                        <td><button style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">View Details</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
         }
 
         document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "Submitting...";
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
 
-const payload = {
-    title: document.getElementById('fTitle').value, // This fixes the 'required' error
-    type: document.getElementById('fType').value,
-    severity: document.getElementById('fSeverity').value,
-    description: document.getElementById('fDesc').value,
-    lat: 9.6500,
-    lng: 123.8500
-};
-    impact: {
-        casualties: document.getElementById('fCasualties').value,
-        damage: document.getElementById('fDamage').value
-    },
-    reporter: {
-        name: document.getElementById('fReporterName').value,
-        contact: document.getElementById('fReporterContact').value
-    }
-};
-            const res = await fetch('/api/report-hazard', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+            // Updated Payload keys to match Mongoose schema (Fixes ValidationError)
+            const payload = {
+                title: document.getElementById('fTitle').value,
+                type: document.getElementById('fType').value,
+                severity: document.getElementById('fSeverity').value,
+                description: document.getElementById('fDesc').value,
+                lat: 9.6500, // Static for now
+                lng: 123.8500
+            };
 
-            if(res.ok) {
-                document.getElementById('fullReportForm').reset();
-                switchTab('reports');
-            } else {
-                alert("Error submitting report.");
+            try {
+                const res = await fetch('/api/report-hazard', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if(res.ok) {
+                    document.getElementById('fullReportForm').reset();
+                    switchTab('reports');
+                } else {
+                    const errData = await res.json();
+                    alert("Error: " + (errData.message || "Could not save report."));
+                }
+            } catch (err) {
+                alert("Server Connection Failed.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
-            btn.innerText = "Submit Report";
         });
 
-        window.onload = () => fetchReports();
+        window.onload = fetchReports;
     </script>
 </body>
 </html>
