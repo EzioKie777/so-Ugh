@@ -245,6 +245,17 @@
             <div id="heritage-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
             </div>
         </section>
+        <section class="risk-mapping-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
+    <div class="card">
+        <h3>Severity Distribution</h3>
+        <div id="severity-dist">Loading...</div>
+    </div>
+
+            <div class="card">
+            <h3>Top Vulnerable Sites</h3>
+            <div id="top-sites">Loading...</div>
+            </div>
+        </section>
     </main>
     
     <div id="addSiteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center;">
@@ -417,9 +428,48 @@
                 console.error("Error fetching sites:", err);
             }
         }
+        async function updateRiskMapping() {
+    try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+
+        // 1. Severity Distribution (Visual Bars)
+        const sevContainer = document.getElementById('severity-dist');
+        sevContainer.innerHTML = data.severityDist.map(s => {
+            const percentage = ((s.count / data.total) * 100).toFixed(0);
+            return `
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span>${s._id}</span>
+                        <span>${s.count} (${percentage}%)</span>
+                    </div>
+                    <div style="background:#eee; height:8px; border-radius:4px; overflow:hidden;">
+                        <div class="bg-${s._id.toLowerCase()}" style="width:${percentage}%; height:100%;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 2. Top Vulnerable Sites
+        const sitesContainer = document.getElementById('top-sites');
+        sitesContainer.innerHTML = data.topSites.map((site, index) => `
+            <div style="display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                <span style="font-weight:bold; margin-right:15px; color:var(--accent);">#${index + 1}</span>
+                <div style="flex-grow:1;">
+                    <div style="font-size:0.9rem;">${site._id || 'Unknown Location'}</div>
+                    <small style="color:#666;">${site.count} reported incidents</small>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        console.error("Risk Mapping Error:", err);
+    }
+}
 
         // Initial Load
         window.onload = () => {
+            updateRiskMapping();
             fetchReports();
             fetchHeritageSites();
         };

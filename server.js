@@ -146,4 +146,40 @@ app.post('/api/heritage-sites', async (req, res) => {
         res.status(400).json({ message: "Failed to create site", error: err.message });
     }
 });
+
+// GET: Aggregated Trends and Analytics
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const total = await Hazard.countDocuments();
+        
+        // 1. Severity Distribution
+        const severityDist = await Hazard.aggregate([
+            { $group: { _id: "$severity", count: { $sum: 1 } } }
+        ]);
+
+        // 2. Top Vulnerable Sites (Grouped by Address/Location)
+        const topSites = await Hazard.aggregate([
+            { $group: { _id: "$location.address", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+        ]);
+
+        // 3. Trends Over Time (Reports per Day for the last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const trends = await Hazard.aggregate([
+            { $match: { timestamp: { $gte: sevenDaysAgo } } },
+            { $group: { 
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } }, 
+                count: { $sum: 1 } 
+            }},
+            { $sort: { "_id": 1 } }
+        ]);
+
+        res.json({ total, severityDist, topSites, trends });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching analytics" });
+    }
+});
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
