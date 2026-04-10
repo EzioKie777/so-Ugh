@@ -549,69 +549,69 @@
 }
 
 async function loadSeverityDistribution() {
-    const canvas = document.getElementById('severity-pie-chart');
-    const ctx = canvas.getContext('2d');
-    
-    try {
-        const response = await fetch('/api/analytics');
-        const { severityDist } = await response.json();
+            const canvas = document.getElementById('severity-pie-chart');
+            const ctx = canvas.getContext('2d');
+            
+            try {
+                const response = await fetch('/api/analytics');
+                const { severityDist } = await response.json();
 
-        if (!severityDist || severityDist.length === 0) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('No severity data available.', 10, 50);
-            return;
-        }
+                const counts = { Low: 0, Moderate: 0, Critical: 0 };
+                (severityDist || []).forEach(item => {
+                    if (item._id === 'Low' || item._id === 'Moderate' || item._id === 'Critical') {
+                        counts[item._id] = item.count;
+                    }
+                });
 
-        const labels = severityDist.map(s => s._id);
-        const data = severityDist.map(s => s.count);
-        const colors = {
-            'Low': '#10b981',
-            'Moderate': '#f59e0b',
-            'Critical': '#ef4444'
-        };
-        const backgroundColors = severityDist.map(s => colors[s._id] || '#6b7280');
+                const labels = ['Low', 'Moderate', 'Critical'];
+                const data = labels.map(label => counts[label]);
+                const backgroundColors = ['#10b981', '#f59e0b', '#ef4444'];
 
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 1,  // Keeps it square/circular
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: {
-                                size: 12
-                            }
-                        }
+                if (data.every(value => value === 0)) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText('No severity data available.', 10, 50);
+                    return;
+                }
+
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 1
+                        }]
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed + ' reports';
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 1,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 12 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + ' reports';
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
+            } catch (error) {
+                console.error("Severity Distribution Error:", error);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText('Failed to load data.', 10, 50);
             }
-        });
-    } catch (error) {
-        console.error("Severity Distribution Error:", error);
-        ctx.font = '14px Arial';
-        ctx.fillStyle = '#ef4444';
-        ctx.fillText('Failed to load data.', 10, 50);
-    }
-}
+        }
 
         // Initial Load
         window.onload = () => {
