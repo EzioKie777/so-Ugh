@@ -102,7 +102,9 @@
             <div class="nav-item" onclick="switchTab('heritage', this)">
                 <span class="icon">🏛️</span> Heritage Sites
             </div>
-            <div class="nav-item"><span class="icon">🗺️</span> Risk Mapping</div>
+            <div id="btn-risk-mapping" class="nav-item" onclick="switchTab('risk', this)">
+                <span class="icon">📈</span> Risk Mapping
+            </div>
         </nav>
         <div class="sidebar-footer">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px;">
@@ -245,17 +247,30 @@
             <div id="heritage-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
             </div>
         </section>
-        <section class="risk-mapping-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
-    <div class="card">
-        <h3>Severity Distribution</h3>
-        <div id="severity-dist">Loading...</div>
-    </div>
+        
+    <section id="view-risk" class="view-section">
+            <div class="view-header">
+                <h1>Risk Analysis Dashboard</h1>
+                <p>Real-time trends for Tagbilaran City hazard reports.</p>
+            </div>
 
-            <div class="card">
-            <h3>Top Vulnerable Sites</h3>
-            <div id="top-sites">Loading...</div>
+            <div class="risk-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card" style="margin-top: 20px;">
+                <h3>Hazard Trends (Last 7 Days)</h3>
+                <div id="trends-chart" style="height: 200px; display: flex; align-items: flex-end; gap: 10px; padding-top: 20px;">
+                    </div>
+            </div>
+                <div class="card">
+                    <h3>Severity Distribution</h3>
+                    <div id="severity-dist-container">Loading...</div>
+                </div>
+                <div class="card">
+                    <h3>Top Vulnerable Sites</h3>
+                    <div id="vulnerable-sites-list">Loading...</div>
+                </div>
             </div>
         </section>
+
     </main>
     
     <div id="addSiteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center;">
@@ -313,8 +328,10 @@
             
             if(viewId === 'reports') fetchReports();
             if(viewId === 'heritage') fetchHeritageSites();
+            if(viewId === 'risk') loadRiskMappingData();
         }
 
+    
         // ADD SITE FORM LOGIC
         // This MUST come after the HTML form is defined
         const addSiteForm = document.getElementById('addSiteForm');
@@ -394,6 +411,56 @@
         document.getElementById('rt-body').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
     }
 }
+
+document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Disable button to prevent double-submission
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Sending...";
+
+    const formData = {
+        title: document.getElementById('fTitle').value,
+        type: document.getElementById('fType').value,
+        severity: document.getElementById('fSeverity').value,
+        description: document.getElementById('fDesc').value,
+        location: {
+            address: document.getElementById('fAddress').value,
+            heritageSite: document.getElementById('fHeritageSite').value,
+            // Add lat/lng here if you have your map picker working
+            lat: 9.6407, 
+            lng: 123.8547
+        }
+    };
+
+    try {
+        const response = await fetch('/api/hazards', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            alert("Report submitted successfully!");
+            document.getElementById('fullReportForm').reset();
+            switchTab('reports'); // Go back to the list and refresh
+        } else {
+            const err = await response.json();
+            alert("Error: " + err.message);
+        }
+    } catch (error) {
+        console.error("Submission error:", error);
+        alert("Server connection failed.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Official Report";
+    }
+});
+
+
+
+
         // Updated Fetch Logic to handle "healthStatus" badge colors
         async function fetchHeritageSites() {
             try {
@@ -428,48 +495,118 @@
                 console.error("Error fetching sites:", err);
             }
         }
-        async function updateRiskMapping() {
-    try {
-        const res = await fetch('/api/analytics');
-        const data = await res.json();
 
-        // 1. Severity Distribution (Visual Bars)
-        const sevContainer = document.getElementById('severity-dist');
-        sevContainer.innerHTML = data.severityDist.map(s => {
-            const percentage = ((s.count / data.total) * 100).toFixed(0);
-            return `
-                <div style="margin-bottom:15px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span>${s._id}</span>
-                        <span>${s.count} (${percentage}%)</span>
-                    </div>
-                    <div style="background:#eee; height:8px; border-radius:4px; overflow:hidden;">
-                        <div class="bg-${s._id.toLowerCase()}" style="width:${percentage}%; height:100%;"></div>
-                    </div>
-                </div>
+        /*async function loadHazardTrends() {
+        const chart = document.getElementById('trends-chart');
+    
+        try {
+        const response = await fetch('/api/analytics');
+        const data = await response.json();
+        const trends = data.trends; // Extract the trends array
+
+        chart.innerHTML = '';
+
+        if (!trends || trends.length === 0) {
+            chart.innerHTML = '<p style="font-size: 12px; color: #888;">No data for the last 7 days</p>';
+            return;
+        }
+
+        const maxCount = Math.max(...trends.map(t => t.count));
+
+        trends.forEach(item => {
+            const barContainer = document.createElement('div');
+            barContainer.className = "trend-bar-container";
+            barContainer.style.cssText = "flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;";
+
+            const bar = document.createElement('div');
+            const height = (item.count / maxCount) * 100;
+            
+            // Format the date (showing just the day name or MM/DD)
+            const dateObj = new Date(item._id);
+            const dateLabel = dateObj.toLocaleDateString(undefined, { weekday: 'short' });
+
+            bar.style.cssText = `
+                width: 80%;
+                background: linear-gradient(to top, #ef4444, #f87171);
+                height: ${height}%;
+                border-radius: 4px 4px 0 0;
+                transition: height 0.8s ease;
             `;
-        }).join('');
+            bar.title = `${item.count} Hazards on ${item._id}`;
 
-        // 2. Top Vulnerable Sites
-        const sitesContainer = document.getElementById('top-sites');
-        sitesContainer.innerHTML = data.topSites.map((site, index) => `
-            <div style="display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
-                <span style="font-weight:bold; margin-right:15px; color:var(--accent);">#${index + 1}</span>
-                <div style="flex-grow:1;">
-                    <div style="font-size:0.9rem;">${site._id || 'Unknown Location'}</div>
-                    <small style="color:#666;">${site.count} reported incidents</small>
-                </div>
-            </div>
-        `).join('');
+            const label = document.createElement('span');
+            label.innerText = dateLabel;
+            label.style.cssText = "font-size: 10px; margin-top: 4px; color: #64748b;";
 
+            barContainer.appendChild(bar);
+            barContainer.appendChild(label);
+            chart.appendChild(barContainer);
+        });
     } catch (err) {
-        console.error("Risk Mapping Error:", err);
+        console.error("Failed to load trends:", err);
+        chart.innerText = "Error loading trends.";
+    }
+        }*/
+
+        async function syncTrendsWithMongo() {
+    const chart = document.getElementById('trends-chart');
+    
+    try {
+        // 1. Hit your existing analytics endpoint
+        const response = await fetch('/api/analytics');
+        const { trends } = await response.json();
+
+        // 2. Clear the placeholder/static bars
+        chart.innerHTML = '';
+
+        if (!trends || trends.length === 0) {
+            chart.innerHTML = '<p style="color: #64748b; font-size: 0.8rem;">No recent hazards detected.</p>';
+            return;
+        }
+
+        // 3. Scale the bars (find the highest daily count)
+        const maxVal = Math.max(...trends.map(t => t.count));
+
+        trends.forEach(item => {
+            // Create a wrapper for the bar and its label
+            const col = document.createElement('div');
+            col.style.cssText = "flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 8px;";
+
+            // Create the visual bar
+            const bar = document.createElement('div');
+            const heightPct = (item.count / maxVal) * 100;
+
+            bar.style.cssText = `
+                width: 100%;
+                background: #ef4444; /* Standard Red for Hazards */
+                height: ${heightPct}%;
+                border-radius: 4px 4px 0 0;
+                transition: height 0.5s ease-in-out;
+            `;
+            bar.title = `${item.count} reports on ${item._id}`;
+
+            // Create the day label (e.g., "Apr 10")
+            const label = document.createElement('span');
+            const date = new Date(item._id);
+            label.innerText = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            label.style.cssText = "font-size: 10px; color: #64748b; font-weight: 600;";
+
+            col.appendChild(bar);
+            col.appendChild(label);
+            chart.appendChild(col);
+        });
+    } catch (error) {
+        console.error("Chart Sync Error:", error);
+        chart.innerHTML = "Offline";
     }
 }
 
+
+
         // Initial Load
         window.onload = () => {
-            updateRiskMapping();
+            syncTrendsWithMongo();
+            //loadHazardTrends();
             fetchReports();
             fetchHeritageSites();
         };
