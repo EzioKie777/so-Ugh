@@ -99,7 +99,9 @@
                 <span class="icon">📋</span> Active Reports
             </div>
             <div class="nav-label">Resources</div>
-            <div class="nav-item"><span class="icon">🏛️</span> Heritage Sites</div>
+            <div class="nav-item" onclick="switchTab('heritage', this)">
+                <span class="icon">🏛️</span> Heritage Sites
+            </div>
             <div class="nav-item"><span class="icon">🗺️</span> Risk Mapping</div>
         </nav>
         <div class="sidebar-footer">
@@ -232,6 +234,17 @@
                 </div>
             </form>
         </section>
+        <section id="view-heritage" class="view-section">
+            <div class="view-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div>
+                    <h1>Heritage Sites</h1>
+                    <p>Monitored cultural landmarks and their current risk status.</p>
+                </div>
+                <button class="btn btn-submit">+ Add Site</button>
+            </div>
+            <div id="heritage-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+            </div>
+        </section>
     </main>
 
     <script>
@@ -244,7 +257,8 @@
             const target = document.getElementById('view-' + viewId);
             if(target) target.classList.add('active');
             
-            if(viewId === 'reports' || viewId === 'center') fetchReports();
+            if(viewId === 'reports') fetchReports();
+            if(viewId === 'heritage') fetchHeritageSites();
         }
 
         async function fetchReports() {
@@ -275,6 +289,40 @@
                 console.error("Fetch error:", err);
             }
         }
+        
+        async function fetchHeritageSites() {
+    try {
+        const res = await fetch('/api/heritage-sites');
+        const sites = await res.json();
+        
+        const grid = document.getElementById('heritage-grid');
+        
+        if(!sites.length) {
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:50px; color:#999;">No heritage sites registered.</p>';
+            return;
+        }
+
+        grid.innerHTML = sites.map(site => `
+            <div class="form-card" style="margin-bottom:0; padding:0; overflow:hidden;">
+                <div style="height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; color:#999;">
+                    ${site.image ? `<img src="${site.image}" style="width:100%; height:100%; object-fit:cover;">` : 'No Image'}
+                </div>
+                <div style="padding:20px;">
+                    <h3 style="margin:0 0 5px 0; color:var(--text-dark);">${site.name}</h3>
+                    <p style="margin:0 0 15px 0; font-size:12px; color:var(--text-grey);">${site.location}</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="badge" style="background:${site.status === 'Safe' ? '#e7f7ed' : '#fdeaea'}; color:${site.status === 'Safe' ? 'var(--success)' : 'var(--danger)'};">
+                            ${site.status}
+                        </span>
+                        <button style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer;">Manage</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error("Error fetching sites:", err);
+    }
+}
 
         document.getElementById('fullReportForm').addEventListener('submit', async (e) => {
             e.preventDefault();

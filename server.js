@@ -74,6 +74,35 @@ const hazardSchema = new mongoose.Schema({
 
 const Hazard = mongoose.model('Hazard', hazardSchema);
 
+const mongoose = require('mongoose');
+
+const heritageSiteSchema = new mongoose.Schema({
+    name: { 
+        type: String, 
+        required: true,
+        unique: true 
+    },
+    location: {
+        address: String,
+        barangay: String
+    },
+    coordinates: {
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true }
+    },
+    description: String,
+    image: String, // URL to a photo of the site
+    healthStatus: {
+        type: String,
+        enum: ['Excellent', 'Good', 'Fair', 'Poor', 'Critical'],
+        default: 'Excellent'
+    },
+    establishedYear: Number,
+    lastInspected: { type: Date, default: Date.now }
+});
+
+const HeritageSite = mongoose.model('HeritageSite', heritageSiteSchema);
+
 // --- NEW: Route to Save a Hazard ---
 // Example of how your server.js should handle the POST
 app.post('/api/report-hazard', async (req, res) => {
@@ -94,6 +123,27 @@ app.get('/api/hazards', async (req, res) => {
         res.json(hazards);
     } catch (error) {
         res.status(500).json({ message: "Error fetching data." });
+    }
+});
+
+// GET: Fetch all heritage sites
+app.get('/api/heritage-sites', async (req, res) => {
+    try {
+        const sites = await HeritageSite.find().sort({ name: 1 });
+        res.json(sites);
+    } catch (err) {
+        res.status(500).json({ message: "Error retrieving sites", error: err.message });
+    }
+});
+
+// POST: Add a new heritage site
+app.post('/api/heritage-sites', async (req, res) => {
+    try {
+        const newSite = new HeritageSite(req.body);
+        const savedSite = await newSite.save();
+        res.status(201).json(savedSite);
+    } catch (err) {
+        res.status(400).json({ message: "Failed to create site", error: err.message });
     }
 });
 
