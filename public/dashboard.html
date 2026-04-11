@@ -96,7 +96,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+   
 
 </head>
 <body>
@@ -332,20 +332,6 @@
                                 <option value="">— Select City first —</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Heritage Site Affected <span style="color:var(--danger)">*</span></label>
-                            <select id="fHeritageSite" required>
-                                <option value="None/Not Applicable">None/Not Applicable</option>
-                                <option value="Baclayon Church">Baclayon Church</option>
-                                <option value="Dauis Church">Dauis Church</option>
-                                <option value="Blood Compact Site">Blood Compact Site</option>
-                                <option value="Cathedral of St. Joseph the Worker">Cathedral of St. Joseph the Worker</option>
-                                <option value="National Museum of the Philippines – Bohol (Old Provincial Capitol)">National Museum of the Philippines – Bohol (Old Provincial Capitol)</option>
-                                <option value="Casa Rocha-Suarez Heritage House">Casa Rocha-Suarez Heritage House</option>
-                                <option value="President Carlos P. Garcia Heritage House">President Carlos P. Garcia Heritage House</option>
-                                <option value="Plaza Rizal">Plaza Rizal</option>
-                            </select>
-                        </div>
                     </div>
                     <div style="margin-top:10px;">
                         <div id="report-map" style="height:300px; border-radius:10px; overflow:hidden; border:1px solid var(--border);"></div>
@@ -527,7 +513,6 @@
                     incidentDate: document.getElementById('fDate').value,
                     location: {
                         address: `${document.getElementById('fBarangay').value}, ${document.getElementById('fCity').value}, Bohol`,
-                        heritageSite: document.getElementById('fHeritageSite').value,
                         lat: parseFloat(document.getElementById('fLat').value) || null,
                         lng: parseFloat(document.getElementById('fLng').value) || null,
                     },
@@ -1158,18 +1143,19 @@
                 const res = await fetch('/api/hazards');
                 const hazards = await res.json();
 
-                const heatPoints = hazards
-                    .filter(h => h.location?.lat && h.location?.lng)
-                    .map(h => [h.location.lat, h.location.lng, 1]);
-
-                if (heatPoints.length > 0) {
-                    L.heatLayer(heatPoints, {
-                        radius: 35,
-                        blur: 25,
-                        maxZoom: 17,
-                        gradient: { 0.3: '#3b82f6', 0.6: '#f59e0b', 1.0: '#ef4444' }
+                hazards.forEach(h => {
+                    if (!h.location?.lat || !h.location?.lng || !h.radius) return;
+                    const severityColor = h.severity === 'Critical' ? '#ef4444' :
+                                        h.severity === 'Moderate' ? '#f59e0b' : '#3b82f6';
+                    L.circle([h.location.lat, h.location.lng], {
+                        radius: h.radius * 1000,
+                        color: severityColor,
+                        fillColor: severityColor,
+                        fillOpacity: 0.12,
+                        weight: 1.5,
+                        dashArray: '5, 4'
                     }).addTo(commandMap);
-                }
+                });
 
                 // Blue markers for hazard report locations
                 hazards.forEach(h => {
@@ -1184,6 +1170,38 @@
                         .bindPopup(`<strong>${h.title}</strong><br><small>${h.type} — ${h.severity}</small>`)
                         .addTo(commandMap);
                 });
+
+                // Load barangay GeoJSON for flood overlays
+                const barangayRes = await fetch('/bohol_barangays.json');
+                const barangayGeo = await barangayRes.json();
+
+                hazards.filter(h => h.type === 'Flood' && h.location?.address).forEach(h => {
+                    // Extract barangay name from address string "Barangay, City, Bohol"
+                    const parts = h.location.address.split(',');
+                    const barangayName = parts[0]?.trim().toLowerCase();
+                    const municipalityName = parts[1]?.trim().toLowerCase();
+
+                    const match = barangayGeo.features.find(f =>
+                        f.properties.barangay.toLowerCase() === barangayName &&
+                        f.properties.municipality.toLowerCase() === municipalityName
+                    );
+
+                    if (match) {
+                        const severityColor = h.severity === 'Critical' ? '#ef4444' :
+                                            h.severity === 'Moderate' ? '#f59e0b' : '#3b82f6';
+                        L.geoJSON(match, {
+                            style: {
+                                color: severityColor,
+                                fillColor: severityColor,
+                                fillOpacity: 0.25,
+                                weight: 2,
+                                dashArray: '4, 3'
+                            }
+                        }).bindPopup(`<strong>${h.title}</strong><br><small>Flood — ${h.severity}</small>`)
+                        .addTo(commandMap);
+                    }
+                });
+
             } catch (err) {
                 console.error('Failed to load hazards on map:', err);
             }
