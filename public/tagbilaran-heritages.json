@@ -10,7 +10,7 @@
   {
     "name": "Cathedral of St. Joseph the Worker",
     "location": { "address": "Carlos P. Garcia Avenue, Poblacion II, Tagbilaran City" },
-    "coordinates": { "lat": 9.6431, "lng": 123.8541 },
+    "coordinates": { "lat": 9.64325, "lng": 123.85435 },
     "description": "The seat of the Diocese of Tagbilaran. Originally established by Jesuits in 1595, the current coral stone structure dates back to 1855 and features impressive neo-Romanesque interiors and ceiling murals.",
     "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Tagbilaran_Cathedral_Bohol.jpg/640px-Tagbilaran_Cathedral_Bohol.jpg",
     "healthStatus": "Preserved"
@@ -26,7 +26,7 @@
   {
     "name": "Casa Rocha-Suarez Heritage House",
     "location": { "address": "Sitio Ubos, Poblacion I, Tagbilaran City" },
-    "coordinates": { "lat": 9.6425, "lng": 123.8519 },
+    "coordinates": { "lat": 9.64243, "lng": 123.85218 },
     "description": "An American-period ancestral house located in the historic Sitio Ubos district. It exemplifies the 'Bahay na Bato' architecture and reflects the city's early 20th-century residential history.",
     "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Sitio_Ubos_House.jpg/640px-Sitio_Ubos_House.jpg",
     "healthStatus": "Adaptive Reuse"
@@ -58,7 +58,7 @@
     {   
         "name":  "Dauis Church",
         "location": { "address": "Dauis, Bohol (near Tagbilaran City)" },
-        "coordinates": { "lat": 9.6250, "lng": 123.8660 },
+        "coordinates": { "lat": 9.62512, "lng": 123.86644 },
         "description": "A historic church built in the early 18th century, known for its unique architecture and the miraculous image of the Holy Cross. It is a popular pilgrimage site.",
         "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Dauis_Church.jpg/640px-Dauis_Church.jpg",
         "healthStatus": "Preserved"     
