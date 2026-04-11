@@ -122,12 +122,12 @@
         </nav>
         <div class="sidebar-footer">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px;">
-                <div style="width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">G7</div>
+                <div style="width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;" id="user-avatar">??</div>
                 <div>
-                    <div style="font-size:13px; font-weight:600;">Gabriel708</div>
-                    <div style="font-size:10px; opacity:0.5;">Administrator</div>
-                </div>
+                <div style="font-size:13px; font-weight:600;" id="user-display-name">Loading...</div>
+                <div style="font-size:10px; opacity:0.5;" id="user-display-role">—</div>
             </div>
+        </div>
             <a href="index.html" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12px; font-weight: 600;">Logout System →</a>
         </div>
     </aside>
@@ -633,7 +633,11 @@
                 window.location.href = 'index.html';
                 return;
             }
-            
+            const initials = currentUser.username.slice(0, 2).toUpperCase();
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('user-display-name').textContent = currentUser.username;
+            document.getElementById('user-display-role').textContent = currentUser.role === 'Admin' ? 'Administrator' : 'GeoGuard Officer';
+
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('fDate').value = today;
