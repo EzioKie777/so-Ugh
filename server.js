@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -58,9 +59,17 @@ const hazardSchema = new mongoose.Schema({
     address: String,
     lat: Number,
     lng: Number,
-    heritageSite: String,
-    radius: Number
+    heritageSite: String
   },
+  radius: { type: Number, default: null },
+  flaggedSites: [{
+    name: String,
+    address: String,
+    distance: Number,
+    acknowledgedBy: String,
+    acknowledgedAt: Date,
+    status: { type: String, default: 'Unreviewed', enum: ['Unreviewed', 'Acknowledged', 'Cleared'] }
+  }],
   impact: {
     casualties: Number,
     damageEstimate: Number
@@ -77,15 +86,111 @@ const hazardSchema = new mongoose.Schema({
 
 const Hazard = mongoose.model('Hazard', hazardSchema);
 
+// Haversine formula — returns distance in kilometers between two coordinates
+function haversineDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 // --- NEW: Route to Save a Hazard ---
 app.post('/api/report-hazard', async (req, res) => {
     try {
         const newHazard = new Hazard(req.body);
+
+        if (newHazard.location?.lat && newHazard.location?.lng) {
+            const sitesPath = path.join(__dirname, 'public', 'tagbilaran-heritages.json');
+            const sites = JSON.parse(fs.readFileSync(sitesPath, 'utf8'));
+
+            let radiusKm = newHazard.radius ?? 1;
+            if (newHazard.type === 'Fire') radiusKm = 0.5;
+
+            const flagged = [];
+            sites.forEach(site => {
+                if (!site.coordinates?.lat || !site.coordinates?.lng) return;
+                const dist = haversineDistance(
+                    newHazard.location.lat, newHazard.location.lng,
+                    site.coordinates.lat, site.coordinates.lng
+                );
+                if (dist <= radiusKm) {
+                    flagged.push({
+                        name: site.name,
+                        address: site.location?.address || '',
+                        distance: Math.round(dist * 1000),
+                        status: 'Unreviewed'
+                    });
+                }
+            });
+
+            newHazard.flaggedSites = flagged;
+        }
+
         await newHazard.save();
         res.status(201).json(newHazard);
     } catch (err) {
         console.error(err);
-        res.status(400).send(err.message);
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// PATCH: Acknowledge or clear a flagged heritage site
+app.patch('/api/hazards/:id/flagged-sites/:siteName', async (req, res) => {
+    try {
+        const { id, siteName } = req.params;
+        const { status, acknowledgedBy } = req.body;
+
+        const hazard = await Hazard.findById(id);
+        if (!hazard) return res.status(404).json({ message: "Hazard not found." });
+
+        const decodedName = decodeURIComponent(siteName);
+        const site = hazard.flaggedSites.find(s => s.name === decodedName);
+        if (!site) return res.status(404).json({ message: "Flagged site not found." });
+
+        site.status = status;
+        site.acknowledgedBy = acknowledgedBy;
+        site.acknowledgedAt = new Date();
+
+        await hazard.save();
+        res.json(hazard);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error updating flagged site." });
+    }
+});
+
+// GET: All unreviewed flagged sites across all hazards (for Command Center)
+app.get('/api/flagged-sites', async (req, res) => {
+    try {
+        const hazards = await Hazard.find({ 'flaggedSites.0': { $exists: true } })
+            .sort({ timestamp: -1 });
+
+        const flagged = [];
+        hazards.forEach(h => {
+            h.flaggedSites.forEach(site => {
+                if (site.status === 'Unreviewed') {
+                    flagged.push({
+                        hazardId: h._id,
+                        hazardTitle: h.title,
+                        hazardType: h.type,
+                        hazardSeverity: h.severity,
+                        siteName: site.name,
+                        siteAddress: site.address,
+                        distance: site.distance,
+                        status: site.status,
+                        reportedAt: h.timestamp
+                    });
+                }
+            });
+        });
+
+        res.json(flagged);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching flagged sites." });
     }
 });
 
