@@ -265,8 +265,64 @@
                     <div class="card-title"><span>📍</span> Location & Assets</div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>Barangay / Address</label>
-                            <input type="text" id="fAddress" placeholder="Enter specific location">
+                            <label>City / Municipality</label>
+                            <select id="fCity" onchange="populateBarangays()">
+                                <option value="">— Select City/Municipality —</option>
+                                <option>Tagbilaran City</option>
+                                <option>Alburquerque</option>
+                                <option>Alicia</option>
+                                <option>Anda</option>
+                                <option>Antequera</option>
+                                <option>Baclayon</option>
+                                <option>Balilihan</option>
+                                <option>Batuan</option>
+                                <option>Bien Unido</option>
+                                <option>Bilar</option>
+                                <option>Buenavista</option>
+                                <option>Calape</option>
+                                <option>Candijay</option>
+                                <option>Carmen</option>
+                                <option>Catigbian</option>
+                                <option>Clarin</option>
+                                <option>Corella</option>
+                                <option>Cortes</option>
+                                <option>Dagohoy</option>
+                                <option>Danao</option>
+                                <option>Dauis</option>
+                                <option>Dimiao</option>
+                                <option>Duero</option>
+                                <option>Garcia Hernandez</option>
+                                <option>Guindulman</option>
+                                <option>Inabanga</option>
+                                <option>Jagna</option>
+                                <option>Jetafe</option>
+                                <option>Lila</option>
+                                <option>Loay</option>
+                                <option>Loboc</option>
+                                <option>Loon</option>
+                                <option>Mabini</option>
+                                <option>Maribojoc</option>
+                                <option>Panglao</option>
+                                <option>Pilar</option>
+                                <option>Pres. Carlos P. Garcia</option>
+                                <option>Sagbayan</option>
+                                <option>San Isidro</option>
+                                <option>San Miguel</option>
+                                <option>Sevilla</option>
+                                <option>Sierra Bullones</option>
+                                <option>Sikatuna</option>
+                                <option>Talibon</option>
+                                <option>Trinidad</option>
+                                <option>Tubigon</option>
+                                <option>Ubay</option>
+                                <option>Valencia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Barangay</label>
+                            <select id="fBarangay" disabled>
+                                <option value="">— Select City first —</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Heritage Site Affected <span style="color:var(--danger)">*</span></label>
@@ -432,7 +488,7 @@
                     description: document.getElementById('fDesc').value,
                     incidentDate: document.getElementById('fDate').value,
                     location: {
-                        address: document.getElementById('fAddress').value,
+                        address: `${document.getElementById('fBarangay').value}, ${document.getElementById('fCity').value}, Bohol`,
                         heritageSite: document.getElementById('fHeritageSite').value,
                         lat: parseFloat(document.getElementById('fLat').value) || null,
                         lng: parseFloat(document.getElementById('fLng').value) || null,
@@ -1051,6 +1107,73 @@
                 document.getElementById('coord-display').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                 document.getElementById('pin-coords').style.display = 'block';
             });
+        }
+
+        const boholBarangays = {
+            "Tagbilaran City": ["Bool","Booy","Cabawan","Cogon","Dampas","dao","Ilijan","Kalunasan","Manga","Mansasa","Poblacion I","Poblacion II","Poblacion III","San Isidro","Taloto","Tiptip","Ubujan"],
+            "Alburquerque": ["Bongbong","Cansumbol","Cantaub","Cub-itan","Dorol","Lagtangon","Lincod","Mansud","Mayuga","Poblacion","Sagunto","Viga"],
+            "Alicia": ["Anonang","Buli","Bunga","Cahayag","Cawayan","Constitución","General Malvar","Grandeza","Guindaguitan","Harribon","Katipunan","Lantang","Legaspi","Libertad","Maasin","Mahayag","Malaging","Mantasahan","Marawis","Matin-ao","Nausok","Octagon","Pajo","Panadtaran","Poblacion","San Fernando","San Jose","Santo Niño","Solangon","Tabok","Tangkigan","Ticugan","Tiwi","Tubod","Union","Villa Aurora","Villa Milagrosa"],
+            "Anda": ["Almeria","Bacong","Batangan","Bongbong","Bongoyan","Cambuhat","Candaigan","Cantam-is Bago","Cantam-is Ilawod","Casica","Katipunan","Langub","Lapinig","Libertad","Lomboy","Luy-a","Mahangin","Nasingin","Pag-asa","Poblacion","Suba","Tawid","Virgen"],
+            "Antequera": ["Anonang","Bail","Bantolinao","Bicahan","Bitaugan","Bood","Buenavista","Bug-ong","Catigbian","Cogon","Cuaming","Dambog","Gibog","Guindaguitan","Hamog","Hinapoyan","Kalanggaman","Katipunan","Lintuan","Liog","Looc","Lubang","Malinao","Napo","Palacpac","Poblacion","San Ramon","Soom","Tagum"],
+            "Baclayon": ["Adventu","Agahan","Bolod","Bonbon","Bood","Booy","Candabong","Doong","Guiwanon","Landican","Laya","Libo","Liboron","Lo-oc","Lonoy","Mabini","Magtangtang","Manaba","Pagsa","Pamilacan","Patia","Poblacion","Quezon","Sool","Tagubaas","Tubod","Tulang","Tuntud","Ubojan","Villalimpia"],
+            "Balilihan": ["Abad Santos","Agahay","Alicia","Altavas","Ambohao","Anonang","Asinan","Bagong Silang","Bambuyan","Banahao","Bariw","Bituon","Bood","Camambugan","Cambuhat","Cambungao","Canlaas","Cansa-an","Causwagan","Cogon","Cuaming","Datag","General Luna","Gio","Guiwanon","Hagbuaya","Haguilanan","Hambongan","Hanopol","Hanub","Hastings","Lincod","Loctob","Mahayag","Moto","Napo","Omjon","Panghagban","Poblacion","San Isidro","San Jose","Tagum","Taug","Tiguis"],
+            "Batuan": ["Anonang Norte","Anonang Sur","Barrio Nuevo","Cabacnitan","Camayaan","Candabong","Causwagan","Daut","Guinobatan","Haguilanan","Hambongan","Here","Libertad","Liong","Loctob","Magsaysay","Mahagbu","Mahayahay","Mataub","Napo","Poblacion Norte","Poblacion Sur","Quezon","Remedios","San Agustin","San Isidro","San Jose","San Roque","San Vicente","Santo Niño","Tagum","Tipolo","Ubojan","Ulbujan"],
+            "Bien Unido": ["Bilangbilangan Dako","Bilangbilangan Gamay","Bod-an","Boyoan","Cabulijan","Calubian","Campaign","Cancitaran","Comagporan","Cuatrocanto","Hagbuaya","Jubay","Katipunan","La Paz","Lapinig Dako","Lapinig Gamay","Las Salinas","Liberty","Limasawa","Mahangin","Mananao","Maomawan","Marawis","Nasingin","Payahan","Poblacion","Ponong","Punta Cruz","San Isidro","San Jose","Santa Cruz","Santo Niño","Sillon","Tapon","Tindog","Tiniguiban"],
+            "Bilar": ["Bonifacio","Bugang Norte","Bugang Sur","Cabulijan","Cambance","Canbiton","Candugao","Canlambong","Gotozon","Hingkuwagan","Itum","Jacsaon","Lumbay","Lundag","Mabini","Magsaysay","Mahayag","Maucan","Napo","Owac","Poblacion","Rizal","San Agustin","San Francisco","San Isidro","San Pedro","San Roque","Santo Niño","Tagum","Yanaya","Zamora"],
+            "Buenavista": ["Aguinaldo","Apart","Asluman","Banacon","Cagawasan","Cambuhat","Cawayanan","Dongoan","Hanopol","Hanub","Katarungan","Lapacan Norte","Lapacan Sur","Laya","Libertad","Liboron","Mabuhay","Mahayag","Maitum","Mararag","Napo","Nueva Vida","Pag-asa","Pangpang","Punta","Quezon","Reunion","Rizal","Saboy","San Agustin","San Isidro","San Jose","San Vicente","Santo Niño","Sentinela","Sinandigan","Tabok","Tinibgan","Ubayon","Ubojan"],
+            "Calape": ["Abaca","Abad Santos","Angilan","Anonang","Aparición","Bangcas A","Bangcas B","Buanoy","Cabagakian","Cabanawan","Cabungaan","Cambayaon","Canda-alawon","Canlaas","Canubod","Dagohoy","Dimiao","Esperanza","Kagawasan","Kayumabog","Kinabag-an","Labuon","Libertad","Liboron","Lomboy","Lourdes","Lut-od","Mabini","Magsaysay","Mandawa","Maslog","Napo","Ondol","Owac","Palabog","Patrocinio","Poblacion","Quezon","Remedios","San Isidro","San Jose","San Roque","Santo Rosario","Shoran","Sinandigan","Tagum","Tan-awan","Tiguib","Tubaon"],
+            "Candijay": ["Abango","Badiang","Bongbong","Cagwang","Cambane","Can-aga","Canmano","Canmaya Centru","Canmaya Diot","Cogtong","Laca","Langtad","Laniwan","Laya","Lobogon","Mahayag","Malbago","Napo","Pagahat","Panadtaran","Panas","Poblacion","San Isidro","Sikatuna","Tapon","Tawid","Tubod","Tugas","Ubojan","Ulbujan"],
+            "Carmen": ["Cabadiangan","Cagawasan","Campagao","Cansibao","Catungawan Norte","Catungawan Sur","Datag","Guadalupe","Hagbuaya","Kagawasan","Kanapnapan","Kantabogon","Kantajok","Kayumabog","Labtason","Lagdo","Libertad","Liboron","Lomboy","Magsaysay","Mahayag","Matin-ao","Napo","Palo Alto","Panas","Peñalara","Poblacion","Ponong","Prado","Puerto Princesa","Punta Cruz","San Isidro","San Jose","San Roque","San Vicente","Santo Niño","Tagum","Tapon","Tindog"],
+            "Catigbian": ["Alegria","Ambuan","Baang","Bagtic","Bongbong","Cagamutan","Can-angay","Canbaloay","Candugao","Cantiguib","Cogon","Cuaming","Daga","Ilaud","Jimenez","Lambusan","Laya","Lepanto","Libertad","Magsaysay","Mahayag","Mataub","Napo","Poblacion Norte","Poblacion Sur","Quezon","San Isidro","Tagum","Taug","Ulbujan"],
+            "Clarin": ["Bago","Bagong Silang","Caminawit","Camp 10","Cantao-an","Dapdap","Gairan","Guadalupe","Katipunan","La Hacienda","Lapinig","Las Vegas","Lawis","Lintuan","Looc","Mabini","Magsaysay","Mahayag","Manguiao","New Clarin","Owac","Pagsa","Poblacion","Punta","San Isidro","San Jose","San Roque","Santo Niño","Soom","Tabok","Tangnan","Tindog","Tubod","Tumantong"],
+            "Corella": ["Anislag","Canangca-an","Cansiwang","Cogon","Daut","Hagbuaya","Haguilanan","Laya","Loon","Magsaysay","Poblacion","San Miguel","Taming"],
+            "Cortes": ["Anislag","Badiang","Bongbong","Bunga","Cabangahan","Can-ibol","Canmano","Cantam-is Bago","Cantam-is Ilawod","Cogon","Datag","Estaca","Katipunan","Laya","Libertad","Magsaysay","Moto","Napo","Poblacion","San Isidro","Tanday"],
+            "Dagohoy": ["Bagtic","Bagnao","Biabas","Bulawan","Cagawasan","Cahayag","Caidiocan","Calunasan","Cambaol","Candelaria","Canlahi","Catoogan","Conceptión","Danao","Estaca","Filomena","Gawayon","Guinobatan","Hagbuaya","Hanopol","Kahayag","Kauswagan","La Esperanza","La Paz","La Salud","La Union","Lapacan","Libertad","Lungsoda-an","Magsaysay","Mahayag","Matin-ao","Napo","Oguis","Panaytayon","Pasong","Poblacion","Remedios","San Agustin","San Carlos","San Isidro","San Miguel","San Pedro","San Vicente","Santo Niño","Santo Rosario","Tagum","Taug"],
+            "Danao": ["Alejawan","Angilan","Anonang","Anoyon","Balayong","Banat","Bongbong","Botong","Bugang","Cagwang","Cahayag","Caidiocan","Calunasan","Cambaol","Cambane","Can-aga","Canlaming","Canmano","Canmaya","Cantaub","Cantom","Casilay","Catugasan","Cogon","Cuaming","Daut","Guinobatan","Guinsayan","Hagbuaya","Katipunan","Laya","Libertad","Lintuan","Liong","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Remedios","San Agustin","San Isidro","San Jose","San Roque","Santo Niño","Tabok","Tangkigan","Ubujan"],
+            "Dauis": ["Biking","Bolod","Candabong","Centro","Danao","Dao","Mariveles","Mayonon","Mongpong","Oco","Pamacsalan","Poblacion","Tangnan","Tinago","Totolan","TRUE"],
+            "Dimiao": ["Abehilan","Abilay Norte","Abilay Sur","Anonang","Balintawak","Baylimango","Bongbong","Calapatan","Canlaas","Canmano","Cantao-an","Danicop","Guindaguitan","Hagbuaya","Hanopol","Kahayag","Kanapnapan","Katipunan","Laya","Libertad","Lomboy","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Remedios","San Agustin","San Isidro","San Jose","San Vicente","Santo Niño","Tagum","Tanday","Ubojan"],
+            "Duero": ["Anonang","Badiang","Bongbong","Cambuhat","Canadieng","Cansibao","Cantaub","Estaca","Kinagbaan","Laya","Libertad","Magsaysay","Napo","Poblacion","San Isidro","Tapon","Tinago","Tubod"],
+            "Garcia Hernandez": ["Anonang","Bongbong","Bood","Canapnapan","Candabong","Canmano","Cantam-is Bago","Cogon","Datag","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Lomboy","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","San Isidro","Tagum","Ubojan"],
+            "Guindulman": ["Anonang","Baongon","Bongbong","Cansibao","Cantao-an","Catungawan","Comaang","Dagohoy","Hibale","Jandayan Norte","Jandayan Sur","Katipunan","La Paz","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","San Agustin","San Isidro","Tagum","Tapon","Tinago","Tubod","Ubojan"],
+            "Inabanga": ["Alegria","Badiang","Bagtic","Banahao","Banlasan","Batuan","Bien Unido","Bingag","Bood","Cahayag","Calangahan","Cambance","Cambuhat","Candelaria","Canlaas","Canmano","Cogon","Cuaming","Dagohoy","Dusita","Fatima","Guinsayan","Hagbuaya","Ilaud","Kahayag","Katipunan","La Paz","Lapacan Norte","Lapacan Sur","Laya","Libertad","Liboron","Lobogon","Lomboy","Loon","Magsaysay","Mahayag","Matin-ao","Mogabong","Napo","Ondol","Pag-asa","Poblacion","Quezon","Remedios","San Agustin","San Francisco","San Isidro","San Jose","San Miguel","San Pedro","San Roque","San Vicente","Santo Niño","Tabok","Tagum","Tapon","Tindog","Tubod","Ubojan","Ulbujan"],
+            "Jagna": ["Alejawan","Balili","Bunga","Cabunga-an","Cagmite","Calabacita","Cantagay","Cantaub","Comaang","Dampas","Ipil","Jandayan","La Paz","Larapan","Lengigon","Linawan","Looc","Loon","Lundag","Malbago","Mayana","Naatang","Nausok","Odiong","Ondol","Pangdan","Panadtaran","Pasong","Poblacion","Punta","San Jose","Tejero","Tubod","Tugas","Viga","Villa Milagrosa"],
+            "Jetafe": ["Alicomohan","Anajawan","Anislag","Bayongan A","Bayongan B","Bayongan C","Bogo","Bood","Cagwang","Cawayanan","Comaang","Ilaud","Jandayan Norte","Jandayan Sur","Katipunan","Laya","Lomboy","Malbago","Mandawa","Matabao","Napo","Pag-asa","Poblacion","San Isidro","San Jose","Taytay","Tubod","Ubojan"],
+            "Lila": ["Bonbon","Bongbong","Cagwang","Can-aga","Candabong","Cantaub","Cogon","Datag","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Lomboy","Looc","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","San Isidro","Tagum","Ubojan"],
+            "Loay": ["Agape","Alegria","Anonang","Bongbong","Bool","Bugho","Canapnapan","Candabong","Cogon","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Lomboy","Looc","Magsaysay","Matin-ao","Napo","Poblacion","San Isidro","Tagum","Ubojan","Ubojan Norte"],
+            "Loboc": ["Alegria","Alicia","Althea","Bae","Bagte","Biabas","Bodla","Bonbon","Bood","Bool","Bugho","Bugtong","Cabadiangan","Camuñag","Canayaon","Candabong","Corazon","Crimea","Dapdap","Looc","Mabini","Matin-ao","Napo","Ngis-ngis","Odiong","Owac","Poblacion","Putik","Quinapondan","Rangas","San Cruz","Tumog","Ubojan","Uba","Valencia"],
+            "Loon": ["Abanico","Abucayan Norte","Abucayan Sur","Agape","Anibongan","Antipolo","Bagacay","Baguhan","Banlasan","Basdacu","Basdio","Biabas","Bongco","Bugho","Buntod","Busao","Cabuyog","Cagawasan","Calayugan Norte","Calayugan Sur","Cambance","Candabong","Candulao","Catagbacan Handig","Catagbacan Norte","Catagbacan Sur","Cogon","Cuaming","Dagnawan","Dakit","Datag","Dice","Diusoy","Doos","Estaca","Gut","Hagdan","Handag","Handayan","Kabangkalan","Katipunan","Langtad","Lintuan","Looc","Mabini","Madua Norte","Madua Sur","Mataub","Mocpoc Norte","Mocpoc Sur","Napo","Ng-ob","Omandig","Oostmalle","Pacao","Pagahat","Pagnitoan","Pangpang","Pantudlan","Pig-ot","Poblacion","Pondol","Quinobatan","Sagrado","San Isidro","Santa Cruz","Santo Niño","Sikatuna","Sondol","Song-on","Tabok","Talisay","Tan-awan","Tangnan","Tañon","Taug","Tiguis","Tok-o","Tolo","Tulang","Tumalog","Ubojan","Uwa"],
+            "Mabini": ["Abehilan","Abilay","Abugon","Agape","Anonang","Bantolinao","Bongbong","Bool","Cagawasan","Calangahan","Cambane","Canangca-an","Canmano","Cantao-an","Cantom","Catungawan","Cogon","Datag","Guindaguitan","Hagbuaya","Hambongan","Katipunan","Laya","Libertad","Lomboy","Looc","Magsaysay","Mahayag","Matin-ao","Napo","Panaytayon","Pob. Candolig","Poblacion","San Isidro","Tagum","Tapon","Ubojan"],
+            "Maribojoc": ["Agape","Alegria","Bayacabac","Bood","Busao","Cabawan","Candabong","Cogon","Dapdap","Estaca","Gayonggayong","Gibitngil","Hagdan","Ipil","Jagoliao","Jandig","Lagtangon","Lincod","Magsaysay","Mandawa","Matabao","Napo","Ngob","Panaytayon","Punta","Puros","Quiroyan","San Isidro","San Roque","Santo Niño","Soom","Tangnan","Toril","Tubod","Ubojan","Villalimpia"],
+            "Panglao": ["Bok-bok","Bolod","Danao","Doljo","Libaong","Looc","Lourdes","Poblacion","Tangnan","Tawala"],
+            "Pilar": ["Bilisan","Bongbong","Cagwang","Cahayag","Campao-an Norte","Campao-an Sur","Candelaria","Casilay","Causwagan","Cogon","Coring","Danicop","Guinsayan","Hambongan","Katipunan","La Paz","Lintuan","Lomboy","Mabini","Magsaysay","Napo","Pob. Badbad Occidental","Pob. Badbad Oriental","Poblacion","San Isidro","San Vicente","Tabok","Tinago","Tubod","Ubojan"],
+            "Pres. Carlos P. Garcia": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","San Isidro","Tagum","Ubojan"],
+            "Sagbayan": ["Baang","Bae","Bag-ong Silang","Bagnao","Bongbong","Bulawan","Canapnapan","Candologo","Canlahi","Canmano","Cantao-an","Cogon","Cuaming","Datag","Estaca","Guindaguitan","Hagbuaya","Kahayag","Katipunan","La Paz","Laya","Libertad","Liboron","Lomboy","Looc","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Remedios","San Agustin","San Francisco","San Isidro","San Jose","San Miguel","San Pedro","San Roque","San Vicente","Santo Niño","Tagum","Tapon","Tindog","Ubojan","Ulbujan"],
+            "San Isidro": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","San Jose","Tagum","Ubojan"],
+            "San Miguel": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"],
+            "Sevilla": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"],
+            "Sierra Bullones": ["Abehilan","Abilay","Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"],
+            "Sikatuna": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"],
+            "Talibon": ["Alejawan","Anibongan","Bagacay","Balintawak","Bongbong","Bool","Bunga","Cahayag","Calangahan","Cambance","Candelaria","Cantaub","Cogon","Cuaming","Dagohoy","Datag","Estaca","Guindaguitan","Hagbuaya","Hambongan","Katipunan","La Paz","Laya","Libertad","Liboron","Lomboy","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Remedios","San Agustin","San Isidro","San Jose","San Roque","San Vicente","Santo Niño","Tagum","Tapon","Tindog","Tubod","Ubojan"],
+            "Trinidad": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"],
+            "Tubigon": ["Bagacay","Bateria","Bilangbilangan","Bosongon","Buenos Aires","Bunacan","Cabilao Grande","Cabilao Pequeño","Cabulijan","Cahayag","Calagtangan","Cambuhat","Candijay","Canigoan","Catagbacan","Catmon","Cawayanan","Cogon","Cuaming","Bioongan","Bagongsilang","Balighot","Banlasan","Baring","Bool","Cahayag","Calangahan","Canlaas","Cantao-an","Dapdap","Guindaguitan","Hagbuaya","Katipunan","Laya","Libertad","Lomboy","Magsaysay","Mahayag","Napo","Poblacion","Poro","Presidente","San Isidro","San Miguel","San Roque","Santo Niño","Tagum","Tindog","Tubod","Ubojan"],
+            "Ubay": ["Acharon","Balbalan","Balili","Baluarte","Calituban","Camambugan","Canlumacad","Comaang","Dealing","Fatima","Governor Celestino Gallares","Humay","Ilaud","Imelda","Juagdan","Katarungan","La Paz","Lapinig","Las Salinas","Liberty","Looc","Mabini","Magsaysay","Mandawa","Napo","Nuevo Campo","Pag-asa","Poblacion","Quezon","Richmond","Saa","San Agustin","San Francisco","San Isidro","San Jose","San Pedro","San Roque","San Vicente","Santo Niño","Tabok","Talibon","Tan-awan","Tinago","Tinubdan","Tosco","Tubod","Ubojan","Union","Villa"],
+            "Valencia": ["Anonang","Bongbong","Cagwang","Candelaria","Cantao-an","Catungawan","Cogon","Cuaming","Datag","Estaca","Guinobatan","Hagbuaya","Katipunan","Laya","Libertad","Magsaysay","Mahayag","Matin-ao","Napo","Poblacion","Quezon","Tagum","Ubojan"]
+        };
+
+        function populateBarangays() {
+            const city = document.getElementById('fCity').value;
+            const barangaySelect = document.getElementById('fBarangay');
+
+            if (!city || !boholBarangays[city]) {
+                barangaySelect.innerHTML = '<option value="">— Select City first —</option>';
+                barangaySelect.disabled = true;
+                return;
+            }
+
+            const barangays = boholBarangays[city].sort();
+            barangaySelect.innerHTML = '<option value="">— Select Barangay —</option>' +
+                barangays.map(b => `<option value="${b}">${b}</option>`).join('');
+            barangaySelect.disabled = false;
         }
     </script>    
 </body>
