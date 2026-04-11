@@ -104,7 +104,12 @@ app.get('/api/analytics', async (req, res) => {
             { $group: { _id: "$severity", count: { $sum: 1 } } }
         ]);
 
+        // Updated: Top Vulnerable Sites based on recent reports (last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
         const topSites = await Hazard.aggregate([
+            { $match: { timestamp: { $gte: thirtyDaysAgo } } },
             { $group: { _id: "$location.address", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 5 }
