@@ -277,6 +277,8 @@
     </main>
     
     <script>
+        let currentTab = 'center'; // Track current active tab
+
         // Tab Switching Logic
         function switchTab(viewId, el) {
             if(el) {
@@ -287,9 +289,15 @@
             const target = document.getElementById('view-' + viewId);
             if(target) target.classList.add('active');
             
+            currentTab = viewId; // Update current tab
+            
             if(viewId === 'reports') fetchReports();
             if(viewId === 'heritage') fetchHeritageSites();
-            if(viewId === 'risk') loadRiskMappingData();
+            if(viewId === 'risk') {
+                loadRiskMappingData();
+                loadSeverityDistribution();
+                syncTrendsWithMongo();
+            }
         }
 
     
@@ -326,6 +334,10 @@
                         fullReportForm.reset();
                         switchTab('reports');
                         fetchReports();
+                        // Also refresh analytics data for real-time updates
+                        loadRiskMappingData();
+                        loadSeverityDistribution();
+                        syncTrendsWithMongo();
                     } else {
                         const err = await res.json();
                         alert("Error submitting report: " + err.message);
@@ -542,7 +554,26 @@ async function loadSeverityDistribution() {
             syncTrendsWithMongo();
             fetchReports();
             fetchHeritageSites();
+            // Start polling for real-time updates every 30 seconds
+            setInterval(refreshCurrentTabData, 30000);
         };
+
+        // Function to refresh data for the currently active tab
+        function refreshCurrentTabData() {
+            if (currentTab === 'reports') {
+                fetchReports();
+            } else if (currentTab === 'heritage') {
+                fetchHeritageSites();
+            } else if (currentTab === 'risk') {
+                loadRiskMappingData();
+                loadSeverityDistribution();
+                syncTrendsWithMongo();
+            }
+            // Center tab has stat-active updated via fetchReports, but since it's always visible, maybe update it too
+            if (currentTab !== 'reports') {
+                fetchReports(); // To update the stat-active in center
+            }
+        }
 
         async function loadRiskMappingData() {
             try {
