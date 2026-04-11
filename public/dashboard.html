@@ -354,6 +354,31 @@
                             <span id="coord-display" style="font-family:monospace; color:var(--accent);"></span>
                             <span style="float:right; color:var(--text-grey); font-size:11px;">Click map to reposition</span>
                         </div>
+                        
+                        <!-- Radius Control -->
+                        <div id="radius-control" style="margin-top:15px; display:none;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <label style="margin:0;">Affected Radius</label>
+                                <span id="radius-display" style="font-size:13px; font-weight:700; color:var(--accent);">1 km</span>
+                            </div>
+                            <input type="range" id="fRadius" min="1" max="50" value="1" step="1"
+                                style="width:100%; accent-color:var(--accent);"
+                                oninput="updateRadiusDisplay(this.value); drawRadiusCircle(this.value);">
+                            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-grey); margin-top:4px;">
+                                <span>1 km</span><span>25 km</span><span>50 km</span>
+                            </div>
+                        </div>
+
+                        <!-- Fire notice -->
+                        <div id="fire-notice" style="margin-top:15px; display:none; padding:10px 15px; background:#fdeaea; border-radius:8px; font-size:13px; color:var(--danger);">
+                            🔥 Fire hazard radius is automatically set to <strong>500 meters</strong>.
+                        </div>
+
+                        <!-- Flood notice -->
+                        <div id="flood-notice" style="margin-top:15px; display:none; padding:10px 15px; background:#e8f4fd; border-radius:8px; font-size:13px; color:#2980b9;">
+                            🌊 Flood area is determined by the selected barangay. No radius needed.
+                        </div>
+                        
                         <input type="hidden" id="fLat">
                         <input type="hidden" id="fLng">
                     </div>
