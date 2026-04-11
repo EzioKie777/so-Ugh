@@ -110,7 +110,7 @@ app.get('/api/analytics', async (req, res) => {
         
         const topSites = await Hazard.aggregate([
             { $match: { timestamp: { $gte: thirtyDaysAgo } } },
-            { $group: { _id: "$location.address", count: { $sum: 1 } } },
+            { $group: { _id: "$location.heritageSite", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 5 }
         ]);
