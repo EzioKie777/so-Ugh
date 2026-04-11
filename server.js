@@ -169,4 +169,17 @@ app.put('/api/hazards/:id/verify', async (req, res) => {
     }
 });
 
+// --- DELETE: Remove a Hazard Report ---
+app.delete('/api/hazards/:id', async (req, res) => {
+    try {
+        const hazard = await Hazard.findByIdAndDelete(req.params.id);
+        if (!hazard) {
+            return res.status(404).json({ message: "Hazard not found." });
+        }
+        res.json({ message: "Hazard deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting hazard." });
+    }
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -143,9 +143,8 @@
             </div>
             <div class="stats-grid">
                 <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Active Hazards</p><h2 id="stat-active" style="margin:0; font-size:32px;">0</h2></div>
-                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Sites Protected</p><h2 style="margin:0; font-size:32px;">24</h2></div>
-                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Resolved (24h)</p><h2 style="margin:0; font-size:32px; color:var(--success);">3</h2></div>
-                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">System Status</p><h2 style="margin:0; font-size:18px; color:var(--success);">● OPERATIONAL</h2></div>
+                <div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Sites Protected</p><h2 id="stat-sites" style="margin:0; font-size:32px;">—</h2></div>
+<div class="form-card"><p style="font-size:13px; color:var(--text-grey); margin:0 0 10px 0;">Resolved (24h)</p><h2 id="stat-resolved" style="margin:0; font-size:32px; color:var(--success);">—</h2></div>
             </div>
         </section>
 
@@ -412,55 +411,59 @@
         }
 
         async function fetchReports() {
-    try {
-        const res = await fetch('/api/hazards');
-        const data = await res.json();
-        
-        const tbody = document.getElementById('rt-body');
-        const statActive = document.getElementById('stat-active');
-        
-        // Update the "Active Hazards" counter
-        statActive.innerText = data.length;
-        
-        if(!data.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
-            return;
-        }
+            try {
+                const res = await fetch('/api/hazards');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('rt-body');
+                const statActive = document.getElementById('stat-active');
+                
+                // Update the "Active Hazards" counter
+                statActive.innerText = data.length;
+                
+                if(!data.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+                    return;
+                }
 
-        tbody.innerHTML = data.map(h => `
-            <tr>
-                <td>
-                    <strong>${h.title || 'Untitled Report'}</strong><br>
-                    <small style="color:var(--text-grey)">${h.location?.address || 'No address provided'}</small>
-                </td>
-                <td>${h.type || 'Other'}</td>
-                <td>
-                    <span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">
-                        ${h.severity || 'Moderate'}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">
-                        ${h.status || 'Pending'}
-                    </span>
-                </td>
-                <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
-                <td>
-                    <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
-                        View Details
-                    </button>
-                    ${currentUser && currentUser.role === 'Admin' && h.status === 'Pending' ? 
-                        `<button onclick="verifyHazard('${h._id}')" style="background:none; border:none; color:var(--success); cursor:pointer; font-weight:700; margin-left:10px;">
+                tbody.innerHTML = data.map(h => `
+                    <tr>
+                        <td>
+                            <strong>${h.title || 'Untitled Report'}</strong><br>
+                            <small style="color:var(--text-grey)">${h.location?.address || 'No address provided'}</small>
+                        </td>
+                        <td>${h.type || 'Other'}</td>
+                        <td>
+                            <span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">
+                                ${h.severity || 'Moderate'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">
+                                ${h.status || 'Pending'}
+                            </span>
+                        </td>
+                        <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
+                        <td style="display:flex; gap:10px; align-items:center;">
+                            <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
+                            View Details
+                            </button>
+                            ${currentUser && currentUser.role === 'Admin' && h.status === 'Pending' ? 
+                            `<button onclick="verifyHazard('${h._id}')" style="background:none; border:none; color:var(--success); cursor:pointer; font-weight:700;">
                             Verify
-                        </button>` : ''}
-                </td>
-            </tr>
-        `).join('');
-    } catch (err) {
-        console.error("Fetch error:", err);
-        document.getElementById('rt-body').innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
-    }
-}
+                            </button>` : ''}
+                            ${currentUser && currentUser.role === 'Admin' ? 
+                            `<button onclick="deleteHazard('${h._id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:700;">
+                            Delete
+                            </button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Fetch error:", err);
+                document.getElementById('rt-body').innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
+            }
+        }
 
 
 
@@ -503,59 +506,59 @@
         }
 
         async function syncTrendsWithMongo() {
-    const chart = document.getElementById('trends-chart');
-    
-    try {
-        // 1. Hit your existing analytics endpoint
-        const response = await fetch('/api/analytics');
-        const { trends } = await response.json();
+            const chart = document.getElementById('trends-chart');
+            
+            try {
+                // 1. Hit your existing analytics endpoint
+                const response = await fetch('/api/analytics');
+                const { trends } = await response.json();
 
-        // 2. Clear the placeholder/static bars
-        chart.innerHTML = '';
+                // 2. Clear the placeholder/static bars
+                chart.innerHTML = '';
 
-        if (!trends || trends.length === 0) {
-            chart.innerHTML = '<p style="color: #64748b; font-size: 0.8rem;">No recent hazards detected.</p>';
-            return;
+                if (!trends || trends.length === 0) {
+                    chart.innerHTML = '<p style="color: #64748b; font-size: 0.8rem;">No recent hazards detected.</p>';
+                    return;
+                }
+
+                // 3. Scale the bars (find the highest daily count)
+                const maxVal = Math.max(...trends.map(t => t.count));
+
+                trends.forEach(item => {
+                    // Create a wrapper for the bar and its label
+                    const col = document.createElement('div');
+                    col.style.cssText = "flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 8px;";
+
+                    // Create the visual bar
+                    const bar = document.createElement('div');
+                    const heightPct = (item.count / maxVal) * 100;
+
+                    bar.style.cssText = `
+                        width: 100%;
+                        background: #ef4444; /* Standard Red for Hazards */
+                        height: ${heightPct}%;
+                        border-radius: 4px 4px 0 0;
+                        transition: height 0.5s ease-in-out;
+                    `;
+                    bar.title = `${item.count} reports on ${item._id}`;
+
+                    // Create the day label (e.g., "Apr 10")
+                    const label = document.createElement('span');
+                    const date = new Date(item._id);
+                    label.innerText = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    label.style.cssText = "font-size: 10px; color: #64748b; font-weight: 600;";
+
+                    col.appendChild(bar);
+                    col.appendChild(label);
+                    chart.appendChild(col);
+                });
+            } catch (error) {
+                console.error("Chart Sync Error:", error);
+                chart.innerHTML = "Offline";
+            }
         }
 
-        // 3. Scale the bars (find the highest daily count)
-        const maxVal = Math.max(...trends.map(t => t.count));
-
-        trends.forEach(item => {
-            // Create a wrapper for the bar and its label
-            const col = document.createElement('div');
-            col.style.cssText = "flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 8px;";
-
-            // Create the visual bar
-            const bar = document.createElement('div');
-            const heightPct = (item.count / maxVal) * 100;
-
-            bar.style.cssText = `
-                width: 100%;
-                background: #ef4444; /* Standard Red for Hazards */
-                height: ${heightPct}%;
-                border-radius: 4px 4px 0 0;
-                transition: height 0.5s ease-in-out;
-            `;
-            bar.title = `${item.count} reports on ${item._id}`;
-
-            // Create the day label (e.g., "Apr 10")
-            const label = document.createElement('span');
-            const date = new Date(item._id);
-            label.innerText = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            label.style.cssText = "font-size: 10px; color: #64748b; font-weight: 600;";
-
-            col.appendChild(bar);
-            col.appendChild(label);
-            chart.appendChild(col);
-        });
-    } catch (error) {
-        console.error("Chart Sync Error:", error);
-        chart.innerHTML = "Offline";
-    }
-}
-
-async function loadSeverityDistribution() {
+        async function loadSeverityDistribution() {
             const canvas = document.getElementById('severity-pie-chart');
             const ctx = canvas.getContext('2d');
             
@@ -634,7 +637,7 @@ async function loadSeverityDistribution() {
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('fDate').value = today;
-            
+            loadCenterStats();
             loadSeverityDistribution(); 
             syncTrendsWithMongo();
             fetchReports();
@@ -653,11 +656,15 @@ async function loadSeverityDistribution() {
                 loadRiskMappingData();
                 loadSeverityDistribution();
                 syncTrendsWithMongo();
+            } else if (currentTab === 'center') {
+                loadCenterStats();
             }
+
             // Center tab has stat-active updated via fetchReports, but since it's always visible, maybe update it too
             if (currentTab !== 'reports') {
                 fetchReports(); // To update the stat-active in center
             }
+            
         }
 
         async function loadRiskMappingData() {
@@ -714,36 +721,82 @@ async function loadSeverityDistribution() {
         }
 
         async function viewHazard(id) {
-    try {
-        const res = await fetch(`/api/hazards/${id}`);
-        const h = await res.json();
+            try {
+                const res = await fetch(`/api/hazards/${id}`);
+                const h = await res.json();
 
-        document.getElementById('modal-title').textContent = h.title || 'Untitled Report';
-        document.getElementById('modal-type').textContent = h.type || '—';
-        document.getElementById('modal-severity').innerHTML = `<span class="badge badge-${(h.severity||'moderate').toLowerCase()}">${h.severity || '—'}</span>`;
-        document.getElementById('modal-status').innerHTML = `<span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">${h.status || 'Pending'}</span>`;
-        document.getElementById('modal-date').textContent = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
-        document.getElementById('modal-address').textContent = h.location?.address || '—';
-        document.getElementById('modal-heritage').textContent = h.location?.heritageSite || '—';
-        document.getElementById('modal-desc').textContent = h.description || 'No assessment provided.';
-        document.getElementById('modal-submitted').textContent = h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
+                document.getElementById('modal-title').textContent = h.title || 'Untitled Report';
+                document.getElementById('modal-type').textContent = h.type || '—';
+                document.getElementById('modal-severity').innerHTML = `<span class="badge badge-${(h.severity||'moderate').toLowerCase()}">${h.severity || '—'}</span>`;
+                document.getElementById('modal-status').innerHTML = `<span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">${h.status || 'Pending'}</span>`;
+                document.getElementById('modal-date').textContent = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
+                document.getElementById('modal-address').textContent = h.location?.address || '—';
+                document.getElementById('modal-heritage').textContent = h.location?.heritageSite || '—';
+                document.getElementById('modal-desc').textContent = h.description || 'No assessment provided.';
+                document.getElementById('modal-submitted').textContent = h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
 
-        document.getElementById('hazard-modal').classList.add('open');
-    } catch (err) {
-        alert('Could not load report details. Please try again.');
-    }
-}
+                document.getElementById('hazard-modal').classList.add('open');
+            } catch (err) {
+                alert('Could not load report details. Please try again.');
+            }
+        }
 
-function closeModal() {
-    document.getElementById('hazard-modal').classList.remove('open');
-}
+        function closeModal() {
+            document.getElementById('hazard-modal').classList.remove('open');
+        }
 
-// Close modal when clicking outside
-document.getElementById('hazard-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
+        // Close modal when clicking outside
+        document.getElementById('hazard-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
 
-    </script>
-    
+        async function loadCenterStats() {
+        // Sites Protected — count from JSON
+            try {
+                const res = await fetch('/tagbilaran-heritages.json');
+                const sites = await res.json();
+                document.getElementById('stat-sites').textContent = Array.isArray(sites) ? sites.length : '—';
+            } catch {
+                document.getElementById('stat-sites').textContent = '—';
+            }
+
+            // Resolved in last 24h — count Verified hazards from DB
+            try {
+                const res = await fetch('/api/hazards');
+                const hazards = await res.json();
+                const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                const resolved = hazards.filter(h =>
+                    h.status === 'Verified' &&
+                    new Date(h.verifiedAt) >= oneDayAgo
+                ).length;
+                document.getElementById('stat-resolved').textContent = resolved;
+            } catch {
+                document.getElementById('stat-resolved').textContent = '—';
+            }
+        }
+
+        async function deleteHazard(id) {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                alert('Only admins can delete reports.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this report? This cannot be undone.')) return;
+
+            try {
+                const res = await fetch(`/api/hazards/${id}`, { method: 'DELETE' });
+
+                if (res.ok) {
+                    fetchReports();
+                    loadCenterStats();
+                } else {
+                    const err = await res.json();
+                    alert('Error deleting report: ' + err.message);
+                }
+            } catch (err) {
+                alert('Server connection failed. Please try again.');
+            }
+        }   
+    </script>    
 </body>
 </html>
