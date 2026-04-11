@@ -50,7 +50,7 @@
     {
         "name": "Baclayon Church",
         "location": { "address": "Baclayon, Bohol (near Tagbilaran City)" },
-        "coordinates": { "lat": 9.5932, "lng": 123.9898 },
+        "coordinates": { "lat": 9.6228578, "lng": 123.9124512 },
         "description": "One of the oldest churches in the Philippines, built in 1596. It is a UNESCO World Heritage Site candidate and features a museum with religious artifacts.",
         "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Baclayon_Church.jpg/640px-Baclayon_Church.jpg",
         "healthStatus": "Restored"
@@ -58,7 +58,7 @@
     {   
         "name":  "Dauis Church",
         "location": { "address": "Dauis, Bohol (near Tagbilaran City)" },
-        "coordinates": { "lat": 9.5938, "lng": 123.9890 },
+        "coordinates": { "lat": 9.6250, "lng": 123.8660 },
         "description": "A historic church built in the early 18th century, known for its unique architecture and the miraculous image of the Holy Cross. It is a popular pilgrimage site.",
         "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Dauis_Church.jpg/640px-Dauis_Church.jpg",
         "healthStatus": "Preserved"     
