@@ -52,6 +52,10 @@
                 <form id="registerForm">
                     <input type="text" id="username" placeholder="Choose Username" required>
                     <input type="password" id="password" placeholder="Create Password" required>
+                    <select id="role" style="padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; width: 100%; margin-bottom: 12px;">
+                        <option value="GeoGuard">GeoGuard (Regular User)</option>
+                        <option value="Admin">Admin</option>
+                    </select>
                     <button type="submit" class="action-btn" id="regBtn">CREATE ACCOUNT</button>
                 </form>
                 <div class="footer-links">
@@ -81,12 +85,13 @@
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
 
             try {
                 const res = await fetch('/api/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, role })
                 });
                 
                 const data = await res.json();

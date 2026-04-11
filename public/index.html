@@ -110,6 +110,8 @@
 
             if (data.success) {
                 showMessage("Success! Entering GeoGuard...", false);
+                // Store user data in localStorage
+                localStorage.setItem('user', JSON.stringify(data.user));
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1000); // Wait 1 second so they can see the success message

@@ -17,7 +17,8 @@ mongoose.connect(MONGO_URI)
 // Define the User Schema (The "Blueprint")
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    role: { type: String, default: 'GeoGuard', enum: ['Admin', 'GeoGuard'] }
 });
 
 const User = mongoose.model('User', userSchema);
@@ -25,8 +26,8 @@ const User = mongoose.model('User', userSchema);
 // 3. Updated Signup Logic
 app.post('/api/signup', async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const newUser = new User({ username, password });
+        const { username, password, role = 'GeoGuard' } = req.body;
+        const newUser = new User({ username, password, role });
         await newUser.save(); // This sends the data to the cloud
         res.json({ message: "Account saved to the cloud!" });
     } catch (error) {
@@ -40,7 +41,7 @@ app.post('/api/login', async (req, res) => {
     const user = await User.findOne({ username, password });
 
     if (user) {
-        res.json({ success: true, message: "Login successful!" });
+        res.json({ success: true, message: "Login successful!", user: { username: user.username, role: user.role } });
     } else {
         res.status(401).json({ success: false, message: "Invalid credentials." });
     }
@@ -52,6 +53,7 @@ const hazardSchema = new mongoose.Schema({
   type: { type: String, enum: ['Flood', 'Fire', 'Earthquake', 'Other'] },
   severity: { type: String, enum: ['Low', 'Moderate', 'Critical'] },
   description: String,
+  incidentDate: { type: Date, required: true },
   location: {
     address: String,
     lat: Number,
@@ -67,7 +69,9 @@ const hazardSchema = new mongoose.Schema({
     name: String,
     contact: String
   },
-  status: { type: String, default: 'Active' },
+  status: { type: String, default: 'Pending', enum: ['Pending', 'Verified', 'Rejected'] },
+  verifiedBy: String,
+  verifiedAt: Date,
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -92,6 +96,19 @@ app.get('/api/hazards', async (req, res) => {
         res.json(hazards);
     } catch (error) {
         res.status(500).json({ message: "Error fetching data." });
+    }
+});
+
+// --- GET: Single Hazard by ID ---
+app.get('/api/hazards/:id', async (req, res) => {
+    try {
+        const hazard = await Hazard.findById(req.params.id);
+        if (!hazard) {
+            return res.status(404).json({ message: "Hazard not found." });
+        }
+        res.json(hazard);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching hazard details." });
     }
 });
 
@@ -130,6 +147,25 @@ app.get('/api/analytics', async (req, res) => {
         res.json({ total, severityDist, topSites, trends });
     } catch (error) {
         res.status(500).json({ message: "Error fetching analytics" });
+    }
+});
+
+// --- NEW: Route to Verify a Hazard Report ---
+app.put('/api/hazards/:id/verify', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { verifiedBy } = req.body; // Assume we pass the admin username
+        const hazard = await Hazard.findByIdAndUpdate(id, {
+            status: 'Verified',
+            verifiedBy,
+            verifiedAt: new Date()
+        }, { new: true });
+        if (!hazard) {
+            return res.status(404).json({ message: "Hazard not found" });
+        }
+        res.json(hazard);
+    } catch (error) {
+        res.status(500).json({ message: "Error verifying hazard" });
     }
 });
 

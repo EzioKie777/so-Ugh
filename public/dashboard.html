@@ -80,6 +80,17 @@
         .badge-low { background: #e7f7ed; color: var(--success); }
 
         h3 { margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: var(--text-dark); }
+
+    /* --- MODAL --- */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; padding:35px; width:90%; max-width:580px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2); position:relative; }
+    .modal-close { position:absolute; top:15px; right:20px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-grey); }
+    .modal-field { margin-bottom:18px; }
+    .modal-field label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-grey); display:block; margin-bottom:4px; }
+    .modal-field p { margin:0; font-size:14px; color:var(--text-dark); }
+
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -121,6 +132,7 @@
         </div>
     </aside>
 
+
     <main id="main-content">
         <div class="top-breadcrumb">TAGBILARAN CITY / EMERGENCY OPERATIONS</div>
 
@@ -161,7 +173,8 @@
                             <th>Incident Title</th>
                             <th>Type</th>
                             <th>Severity</th>
-                            <th>Time Reported</th>
+                            <th>Status</th>
+                            <th>Incident Date</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -204,6 +217,10 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label>Date of Incident</label>
+                        <input type="date" id="fDate" required value="">
+                    </div>
+                    <div class="form-group">
                         <label>Situation Assessment</label>
                         <textarea id="fDesc" rows="4" placeholder="Describe the current status and visible impacts..."></textarea>
                     </div>
@@ -219,6 +236,7 @@
                         <div class="form-group">
                             <label>Heritage Site Affected <span style="color:var(--danger)">*</span></label>
                             <select id="fHeritageSite" required>
+                                <option value="None/Not Applicable">None/Not Applicable</option>
                                 <option value="Baclayon Church">Baclayon Church</option>
                                 <option value="Dauis Church">Dauis Church</option>
                                 <option value="Blood Compact Site">Blood Compact Site</option>
@@ -277,11 +295,51 @@
                 </div>
             </div>
         </section>
-
+        <div class="modal-overlay" id="hazard-modal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h2 style="margin:0 0 25px 0; font-size:20px; color:var(--text-dark);" id="modal-title">Report Details</h2>
+        <div class="modal-field">
+            <label>Hazard Type</label>
+            <p id="modal-type">—</p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div class="modal-field">
+                <label>Severity</label>
+                <p id="modal-severity">—</p>
+            </div>
+            <div class="modal-field">
+                <label>Status</label>
+                <p id="modal-status">—</p>
+            </div>
+        </div>
+        <div class="modal-field">
+            <label>Incident Date</label>
+            <p id="modal-date">—</p>
+        </div>
+        <div class="modal-field">
+            <label>Location / Address</label>
+            <p id="modal-address">—</p>
+        </div>
+        <div class="modal-field">
+            <label>Heritage Site Affected</label>
+            <p id="modal-heritage">—</p>
+        </div>
+        <div class="modal-field">
+            <label>Situation Assessment</label>
+            <p id="modal-desc" style="line-height:1.6;">—</p>
+        </div>
+        <div class="modal-field">
+            <label>Submitted On</label>
+            <p id="modal-submitted">—</p>
+        </div>
+    </div>
+</div>
     </main>
     
     <script>
         let currentTab = 'center'; // Track current active tab
+        let currentUser = null; // Store current user data
 
         // Tab Switching Logic
         function switchTab(viewId, el) {
@@ -317,6 +375,7 @@
                     type: document.getElementById('fType').value,
                     severity: document.getElementById('fSeverity').value,
                     description: document.getElementById('fDesc').value,
+                    incidentDate: document.getElementById('fDate').value,
                     location: {
                         address: document.getElementById('fAddress').value,
                         heritageSite: document.getElementById('fHeritageSite').value
@@ -364,7 +423,7 @@
         statActive.innerText = data.length;
         
         if(!data.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
             return;
         }
 
@@ -380,17 +439,26 @@
                         ${h.severity || 'Moderate'}
                     </span>
                 </td>
-                <td>${new Date(h.timestamp).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</td>
+                <td>
+                    <span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">
+                        ${h.status || 'Pending'}
+                    </span>
+                </td>
+                <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
                 <td>
                     <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
                         View Details
                     </button>
+                    ${currentUser && currentUser.role === 'Admin' && h.status === 'Pending' ? 
+                        `<button onclick="verifyHazard('${h._id}')" style="background:none; border:none; color:var(--success); cursor:pointer; font-weight:700; margin-left:10px;">
+                            Verify
+                        </button>` : ''}
                 </td>
             </tr>
         `).join('');
     } catch (err) {
         console.error("Fetch error:", err);
-        document.getElementById('rt-body').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
+        document.getElementById('rt-body').innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
     }
 }
 
@@ -554,6 +622,19 @@ async function loadSeverityDistribution() {
 
         // Initial Load
         window.onload = () => {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+            } else {
+                // Redirect to login if no user
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fDate').value = today;
+            
             loadSeverityDistribution(); 
             syncTrendsWithMongo();
             fetchReports();
@@ -606,6 +687,62 @@ async function loadSeverityDistribution() {
                 document.getElementById('vulnerable-sites-list').innerHTML = '<p style="color: #ef4444;">Failed to load vulnerable sites data.</p>';
             }
         }
+
+        async function verifyHazard(hazardId) {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                alert('Only admins can verify reports.');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/hazards/${hazardId}/verify`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ verifiedBy: currentUser.username })
+                });
+                
+                if (res.ok) {
+                    alert('Report verified successfully!');
+                    fetchReports(); // Refresh the reports list
+                } else {
+                    const err = await res.json();
+                    alert('Error verifying report: ' + err.message);
+                }
+            } catch (err) {
+                alert('Server connection failed. Please try again.');
+            }
+        }
+
+        async function viewHazard(id) {
+    try {
+        const res = await fetch(`/api/hazards/${id}`);
+        const h = await res.json();
+
+        document.getElementById('modal-title').textContent = h.title || 'Untitled Report';
+        document.getElementById('modal-type').textContent = h.type || '—';
+        document.getElementById('modal-severity').innerHTML = `<span class="badge badge-${(h.severity||'moderate').toLowerCase()}">${h.severity || '—'}</span>`;
+        document.getElementById('modal-status').innerHTML = `<span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">${h.status || 'Pending'}</span>`;
+        document.getElementById('modal-date').textContent = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
+        document.getElementById('modal-address').textContent = h.location?.address || '—';
+        document.getElementById('modal-heritage').textContent = h.location?.heritageSite || '—';
+        document.getElementById('modal-desc').textContent = h.description || 'No assessment provided.';
+        document.getElementById('modal-submitted').textContent = h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
+
+        document.getElementById('hazard-modal').classList.add('open');
+    } catch (err) {
+        alert('Could not load report details. Please try again.');
+    }
+}
+
+function closeModal() {
+    document.getElementById('hazard-modal').classList.remove('open');
+}
+
+// Close modal when clicking outside
+document.getElementById('hazard-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
     </script>
     
 </body>
