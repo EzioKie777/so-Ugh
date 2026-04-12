@@ -195,4 +195,24 @@
     .risk-pill { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; color: white; }
 
 
-
+    /* Heritage card hazard summary row */
+    .heritage-hazard-summary {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+    
+    /* Heritage footer: badge + score side by side */
+    .heritage-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Map legend additions for health colors */
+    .legend-pill .health-excellent { background: #27ae60; }
+    .legend-pill .health-good      { background: #2ecc71; }
+    .legend-pill .health-fair      { background: #f39c12; }
+    .legend-pill .health-at-risk   { background: #e74c3c; }
