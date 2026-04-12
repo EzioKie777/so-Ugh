@@ -1,3 +1,10 @@
+// ============================================================
+//  js/forms.js  —  Tagbi GeoGuard (Fixed)
+//  Changes:
+//   - Report submission now uses window.authFetch()
+//   - Description field properly validated as required
+// ============================================================
+
 import { clearRadiusCircle, drawRadiusCircle, reportPin } from './map.js';
 
 export const boholBarangays = {
@@ -52,32 +59,31 @@ export const boholBarangays = {
 };
 
 export function populateBarangays() {
-    const city = document.getElementById('fCity').value;
+    const city          = document.getElementById('fCity').value;
     const barangaySelect = document.getElementById('fBarangay');
 
     if (!city || !boholBarangays[city]) {
         barangaySelect.innerHTML = '<option value="">— Select City first —</option>';
-        barangaySelect.disabled = true;
+        barangaySelect.disabled  = true;
         return;
     }
 
     const barangays = boholBarangays[city].slice().sort();
-    barangaySelect.innerHTML = '<option value="">— Select Barangay —</option>' + barangays.map(b => `<option value="${b}">${b}</option>`).join('');
+    barangaySelect.innerHTML = '<option value="">— Select Barangay —</option>' +
+        barangays.map(b => `<option value="${b}">${b}</option>`).join('');
     barangaySelect.disabled = false;
 }
 
 export function updateRadiusControl() {
-    const type = document.getElementById('fType').value;
+    const type         = document.getElementById('fType').value;
     const radiusControl = document.getElementById('radius-control');
-    const fireNotice = document.getElementById('fire-notice');
-    const floodNotice = document.getElementById('flood-notice');
-
+    const fireNotice    = document.getElementById('fire-notice');
+    const floodNotice   = document.getElementById('flood-notice');
     if (!radiusControl || !fireNotice || !floodNotice) return;
 
     radiusControl.style.display = 'none';
-    fireNotice.style.display = 'none';
-    floodNotice.style.display = 'none';
-
+    fireNotice.style.display    = 'none';
+    floodNotice.style.display   = 'none';
     clearRadiusCircle();
 
     if (type === 'Earthquake' || type === 'Other') {
@@ -97,24 +103,25 @@ export function updateRadiusDisplay(val) {
 }
 
 export function setupFullReportForm(onSuccess) {
-    const fullReportForm = document.getElementById('fullReportForm');
-    if (!fullReportForm) return;
+    const form = document.getElementById('fullReportForm');
+    if (!form) return;
 
-    fullReportForm.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const title = document.getElementById('fTitle').value.trim();
-        const hazardType = document.getElementById('fType').value;
-        const severity = document.getElementById('fSeverity').value;
-        const description = document.getElementById('fDesc').value.trim();
+        const title       = document.getElementById('fTitle').value.trim();
+        const hazardType  = document.getElementById('fType').value;
+        const severity    = document.getElementById('fSeverity').value;
+        const description = document.getElementById('fDesc').value.trim();   // now required
         const incidentDate = document.getElementById('fDate').value;
-        const barangay = document.getElementById('fBarangay').value;
-        const city = document.getElementById('fCity').value;
-        const lat = parseFloat(document.getElementById('fLat').value);
-        const lng = parseFloat(document.getElementById('fLng').value);
+        const barangay    = document.getElementById('fBarangay').value;
+        const city        = document.getElementById('fCity').value;
+        const lat         = parseFloat(document.getElementById('fLat').value);
+        const lng         = parseFloat(document.getElementById('fLng').value);
 
+        // Validate all required fields including description
         if (!title || !hazardType || !severity || !description || !incidentDate || !barangay || !city) {
-            window.alert('Please complete all required fields and select barangay/city.');
+            window.alert('Please complete all required fields, including the Situation Assessment.');
             return;
         }
 
@@ -123,27 +130,30 @@ export function setupFullReportForm(onSuccess) {
             return;
         }
 
-        const radiusValue = hazardType === 'Fire' ? 0.5 : hazardType === 'Flood' ? null : parseFloat(document.getElementById('fRadius').value) || 1;
+        const radiusValue = hazardType === 'Fire' ? 0.5 :
+                            hazardType === 'Flood' ? null :
+                            parseFloat(document.getElementById('fRadius').value) || 1;
+
         const payload = {
             title,
-            type: hazardType,
+            type:        hazardType,
             severity,
             description,
             incidentDate,
             location: {
                 address: `${barangay}, ${city}, Bohol`,
-                lat: lat || null,
-                lng: lng || null
+                lat:     lat || null,
+                lng:     lng || null
             },
-            radius: radiusValue,
+            radius:    radiusValue,
             timestamp: new Date().toISOString()
         };
 
         try {
-            const res = await fetch('/api/report-hazard', {
+            // Use authFetch so the server can verify the user
+            const res = await window.authFetch('/api/report-hazard', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body:   JSON.stringify(payload)
             });
 
             if (!res.ok) {
@@ -152,9 +162,9 @@ export function setupFullReportForm(onSuccess) {
                 return;
             }
 
-            fullReportForm.reset();
+            form.reset();
             await onSuccess();
-        } catch (err) {
+        } catch {
             window.alert('Server connection failed. Please try again.');
         }
     });

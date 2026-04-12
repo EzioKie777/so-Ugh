@@ -1,6 +1,14 @@
-export let currentTab = 'center';
-export let currentUser = null;
-export let allReports = [];
+// ============================================================
+//  js/dashboard.js  —  Tagbi GeoGuard (Fixed)
+//  Changes:
+//   - All protected API calls now use window.authFetch()
+//   - Map not re-destroyed if already initialized
+//   - fetchHeritageSites / loadRiskMappingData lazy (tab only)
+// ============================================================
+
+export let currentTab      = 'center';
+export let currentUser     = null;
+export let allReports      = [];
 export let pendingDeleteId = null;
 
 export function setCurrentUser(user) {
@@ -18,36 +26,32 @@ export function switchTab(viewId, el) {
     if (target) target.classList.add('active');
 
     currentTab = viewId;
+
     if (viewId === 'center') {
-        import('./map.js').then(module => module.initCommandMap());
+        import('./map.js').then(m => m.initCommandMap());
+        loadFlaggedSites();
+        loadCenterStats();
     }
-    if (viewId === 'reports') {
-        fetchReports();
-    }
-    if (viewId === 'heritage') {
-        fetchHeritageSites();
-    }
+    if (viewId === 'reports')  fetchReports();
+    if (viewId === 'heritage') fetchHeritageSites();
     if (viewId === 'risk') {
         loadRiskMappingData();
-        import('./charts.js').then(module => {
-            module.loadSeverityDistribution();
-            module.syncTrendsWithMongo();
+        import('./charts.js').then(m => {
+            m.loadSeverityDistribution();
+            m.syncTrendsWithMongo();
         });
     }
     if (viewId === 'new-report') {
-        setTimeout(() => import('./map.js').then(module => module.initReportMap()), 100);
+        setTimeout(() => import('./map.js').then(m => m.initReportMap()), 100);
     }
 }
 
 export function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
     if (!toast) return;
-
     toast.textContent = message;
-    toast.className = `toast ${type} show`;
-    window.setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
+    toast.className   = `toast ${type} show`;
+    window.setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 export function renderReports(reports) {
@@ -60,13 +64,14 @@ export function renderReports(reports) {
     }
 
     tbody.innerHTML = reports.map(h => {
-        const flaggedMessage = h.flaggedSites?.length ?
-            `<br><span class="report-warning">⚠️ ${h.flaggedSites.length} heritage site${h.flaggedSites.length > 1 ? 's' : ''} at risk</span>` : '';
-        const statusClass = h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate';
-        const verifyButton = currentUser && currentUser.role === 'Admin' && h.status === 'Pending'
+        const flaggedMessage = h.flaggedSites?.length
+            ? `<br><span class="report-warning">⚠️ ${h.flaggedSites.length} heritage site${h.flaggedSites.length > 1 ? 's' : ''} at risk</span>`
+            : '';
+        const statusClass   = h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate';
+        const verifyButton  = currentUser?.role === 'Admin' && h.status === 'Pending'
             ? `<button onclick="verifyHazard('${h._id}')" class="action-button action-verify">Verify</button>`
             : '';
-        const deleteButton = currentUser && currentUser.role === 'Admin'
+        const deleteButton  = currentUser?.role === 'Admin'
             ? `<button onclick="deleteHazard('${h._id}')" class="action-button action-delete">Delete</button>`
             : '';
 
@@ -92,10 +97,9 @@ export function renderReports(reports) {
 
 export async function fetchReports() {
     try {
-        const res = await fetch('/api/hazards');
+        const res  = await fetch('/api/hazards');
         const data = await res.json();
         allReports = data;
-
         const statActive = document.getElementById('stat-active');
         if (statActive) statActive.innerText = data.length;
         renderReports(allReports);
@@ -108,34 +112,31 @@ export async function fetchReports() {
 
 export function filterReports() {
     const searchInput = document.querySelector('.search-in');
-    const typeSelect = document.querySelector('.filter-bar select');
+    const typeSelect  = document.querySelector('.filter-bar select');
     if (!searchInput || !typeSelect) return;
 
     const search = searchInput.value.toLowerCase();
-    const type = typeSelect.value;
-
+    const type   = typeSelect.value;
     let filtered = allReports;
-    if (type !== 'All Types') {
-        filtered = filtered.filter(h => h.type === type);
-    }
+
+    if (type !== 'All Types') filtered = filtered.filter(h => h.type === type);
     if (search) {
         filtered = filtered.filter(h =>
             (h.title || '').toLowerCase().includes(search) ||
             (h.location?.address || '').toLowerCase().includes(search)
         );
     }
-
     renderReports(filtered);
 }
 
 export async function fetchHeritageSites() {
     try {
-        const res = await fetch('/tagbilaran-heritages.json');
+        const res   = await fetch('/tagbilaran-heritages.json');
         const sites = await res.json();
-        const grid = document.getElementById('heritage-grid');
+        const grid  = document.getElementById('heritage-grid');
         if (!grid) return;
 
-        if (!Array.isArray(sites) || sites.length === 0) {
+        if (!Array.isArray(sites) || !sites.length) {
             grid.innerHTML = '<p class="empty-state">No heritage sites available.</p>';
             return;
         }
@@ -143,10 +144,7 @@ export async function fetchHeritageSites() {
         grid.innerHTML = sites.map(site => {
             const statusClass = ['Excellent', 'Good'].includes(site.healthStatus)
                 ? 'badge-low'
-                : site.healthStatus === 'Fair'
-                    ? 'badge-moderate'
-                    : 'badge-critical';
-
+                : site.healthStatus === 'Fair' ? 'badge-moderate' : 'badge-critical';
             return `
                 <div class="form-card card-no-margin card-heritage">
                     <div class="heritage-image">${site.image ? `<img src="${site.image}" class="heritage-cover">` : '🏛️'}</div>
@@ -167,14 +165,14 @@ export async function fetchHeritageSites() {
 
 export async function loadFlaggedSites() {
     try {
-        const res = await fetch('/api/flagged-sites');
+        const res     = await window.authFetch('/api/flagged-sites');
         const flagged = await res.json();
-        const panel = document.getElementById('flagged-sites-panel');
+        const panel      = document.getElementById('flagged-sites-panel');
         const countBadge = document.getElementById('flagged-count');
         if (!panel || !countBadge) return;
 
         countBadge.textContent = flagged.length ? `${flagged.length} Unreviewed` : 'All Clear';
-        countBadge.className = `status-pill ${flagged.length ? 'status-warning' : 'status-success'}`;
+        countBadge.className   = `status-pill ${flagged.length ? 'status-warning' : 'status-success'}`;
 
         if (!flagged.length) {
             panel.innerHTML = '<p class="success-text">✅ No heritage sites currently at risk.</p>';
@@ -206,66 +204,52 @@ export async function loadFlaggedSites() {
 
 export async function acknowledgeFlaggedSite(hazardId, siteName, status) {
     try {
-        const res = await fetch(`/api/hazards/${hazardId}/flagged-sites/${siteName}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status, acknowledgedBy: currentUser?.username })
+        const res = await window.authFetch(`/api/hazards/${hazardId}/flagged-sites/${siteName}`, {
+            method:  'PATCH',
+            body:    JSON.stringify({ status, acknowledgedBy: currentUser?.username })
         });
         if (res.ok) loadFlaggedSites();
-    } catch (err) {
+        else showToast('Failed to update site status.', 'error');
+    } catch {
         showToast('Failed to update site status.', 'error');
     }
 }
 
 export async function loadRiskMappingData() {
     try {
-        const response = await fetch('/api/flagged-sites');
+        const response     = await window.authFetch('/api/flagged-sites');
         const flaggedSites = await response.json();
-        const listEl = document.getElementById('vulnerable-sites-list');
+        const listEl       = document.getElementById('vulnerable-sites-list');
         if (!listEl) return;
 
-        if (!flaggedSites || flaggedSites.length === 0) {
+        if (!flaggedSites?.length) {
             listEl.innerHTML = '<p class="empty-state">No heritage sites currently flagged by hazard reports.</p>';
             return;
         }
 
-        // Aggregate sites by name and count occurrences
-        const siteAggregation = {};
+        const agg = {};
         flaggedSites.forEach(f => {
-            const key = f.siteName;
-            if (!siteAggregation[key]) {
-                siteAggregation[key] = {
-                    siteName: f.siteName,
-                    siteAddress: f.siteAddress,
-                    count: 0,
-                    highestSeverity: 'Low'
-                };
+            if (!agg[f.siteName]) {
+                agg[f.siteName] = { siteName: f.siteName, siteAddress: f.siteAddress, count: 0, highestSeverity: 'Low' };
             }
-            siteAggregation[key].count++;
-            
-            // Track highest severity seen for this site
-            const severities = ['Low', 'Moderate', 'Critical'];
-            const currentIdx = severities.indexOf(siteAggregation[key].highestSeverity);
-            const newIdx = severities.indexOf(f.hazardSeverity || 'Moderate');
-            if (newIdx > currentIdx) {
-                siteAggregation[key].highestSeverity = f.hazardSeverity || 'Moderate';
-            }
+            agg[f.siteName].count++;
+            const sevs = ['Low', 'Moderate', 'Critical'];
+            if (sevs.indexOf(f.hazardSeverity) > sevs.indexOf(agg[f.siteName].highestSeverity))
+                agg[f.siteName].highestSeverity = f.hazardSeverity;
         });
 
-        // Convert to array and sort by count descending
-        const topSites = Object.values(siteAggregation).sort((a, b) => b.count - a.count);
-
-        listEl.innerHTML = topSites.map((site, index) => {
-            const markerColor = site.count > 5 ? '#ef4444' : site.count > 2 ? '#f59e0b' : '#10b981';
-            const severityLabel = site.count > 5 ? 'CRITICAL' : site.count > 2 ? 'HIGH' : 'MEDIUM';
+        const topSites = Object.values(agg).sort((a, b) => b.count - a.count);
+        listEl.innerHTML = topSites.map((site, i) => {
+            const color = site.count > 5 ? '#ef4444' : site.count > 2 ? '#f59e0b' : '#10b981';
+            const label = site.count > 5 ? 'CRITICAL' : site.count > 2 ? 'HIGH' : 'MEDIUM';
             return `
                 <div class="vulnerable-row">
                     <div>
-                        <div class="vulnerable-name">#${index + 1} ${site.siteName}</div>
+                        <div class="vulnerable-name">#${i + 1} ${site.siteName}</div>
                         <div class="vulnerable-meta">${site.siteAddress}</div>
-                        <div class="vulnerable-meta" style="color: var(--accent); margin-top: 4px; font-weight: 600;">${site.count} hazard report${site.count !== 1 ? 's' : ''} flagging this site</div>
+                        <div class="vulnerable-meta" style="color:var(--accent);margin-top:4px;font-weight:600;">${site.count} hazard report${site.count !== 1 ? 's' : ''} flagging this site</div>
                     </div>
-                    <div class="risk-pill" style="background:${markerColor};">${severityLabel}</div>
+                    <div class="risk-pill" style="background:${color};">${label}</div>
                 </div>`;
         }).join('');
     } catch (error) {
@@ -276,52 +260,48 @@ export async function loadRiskMappingData() {
 }
 
 export async function verifyHazard(hazardId) {
-    if (!currentUser || currentUser.role !== 'Admin') {
+    if (currentUser?.role !== 'Admin') {
         showToast('Only admins can verify reports.', 'error');
         return;
     }
-
     try {
-        const res = await fetch(`/api/hazards/${hazardId}/verify`, {
+        const res = await window.authFetch(`/api/hazards/${hazardId}/verify`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ verifiedBy: currentUser.username })
+            body:   JSON.stringify({ verifiedBy: currentUser.username })
         });
-
         if (res.ok) {
             showToast('Report verified successfully!', 'success');
             fetchReports();
         } else {
             const err = await res.json();
-            showToast('Error verifying report: ' + err.message, 'error');
+            showToast('Error: ' + err.message, 'error');
         }
-    } catch (err) {
-        showToast('Server connection failed. Please try again.', 'error');
+    } catch {
+        showToast('Server connection failed.', 'error');
     }
 }
 
 export async function viewHazard(id) {
     try {
         const res = await fetch(`/api/hazards/${id}`);
-        const h = await res.json();
-
+        const h   = await res.json();
         const modal = document.getElementById('hazard-modal');
         if (!modal) return;
 
-        document.getElementById('modal-title').textContent = h.title || 'Untitled Report';
-        document.getElementById('modal-type').textContent = h.type || '—';
-        document.getElementById('modal-severity').innerHTML = `<span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">${h.severity || '—'}</span>`;
-        document.getElementById('modal-status').innerHTML = `<span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">${h.status || 'Pending'}</span>`;
-        document.getElementById('modal-date').textContent = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
-        document.getElementById('modal-address').textContent = h.location?.address || '—';
+        document.getElementById('modal-title').textContent    = h.title || 'Untitled Report';
+        document.getElementById('modal-type').textContent     = h.type  || '—';
+        document.getElementById('modal-severity').innerHTML   = `<span class="badge badge-${(h.severity||'moderate').toLowerCase()}">${h.severity||'—'}</span>`;
+        document.getElementById('modal-status').innerHTML     = `<span class="badge ${h.status==='Verified'?'badge-low':h.status==='Rejected'?'badge-critical':'badge-moderate'}">${h.status||'Pending'}</span>`;
+        document.getElementById('modal-date').textContent     = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
+        document.getElementById('modal-address').textContent  = h.location?.address || '—';
         const flagged = h.flaggedSites?.filter(s => s.status !== 'Cleared') || [];
         document.getElementById('modal-heritage').textContent = flagged.length ? flagged.map(s => s.name).join(', ') : 'None within hazard radius';
-        document.getElementById('modal-desc').textContent = h.description || 'No assessment provided.';
-        document.getElementById('modal-submitted').textContent = h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
+        document.getElementById('modal-desc').textContent     = h.description || 'No assessment provided.';
+        document.getElementById('modal-submitted').textContent= h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
 
         modal.classList.add('open');
-    } catch (err) {
-        showToast('Could not load report details. Please try again.', 'error');
+    } catch {
+        showToast('Could not load report details.', 'error');
     }
 }
 
@@ -336,46 +316,51 @@ export function closeDeleteModal() {
 
 export async function confirmDeleteHazard() {
     if (!pendingDeleteId) return;
-
     try {
-        const res = await fetch(`/api/hazards/${pendingDeleteId}`, { method: 'DELETE' });
+        const res = await window.authFetch(`/api/hazards/${pendingDeleteId}`, { method: 'DELETE' });
         if (res.ok) {
             closeDeleteModal();
             fetchReports();
             loadCenterStats();
         } else {
             const err = await res.json();
-            showToast('Error deleting report: ' + err.message, 'error');
+            showToast('Error: ' + err.message, 'error');
         }
-    } catch (err) {
-        showToast('Server connection failed. Please try again.', 'error');
+    } catch {
+        showToast('Server connection failed.', 'error');
     }
 }
 
 export async function loadCenterStats() {
     try {
-        const res = await fetch('/tagbilaran-heritages.json');
+        const res   = await fetch('/tagbilaran-heritages.json');
         const sites = await res.json();
-        document.getElementById('stat-sites').textContent = Array.isArray(sites) ? sites.length : '—';
+        const el    = document.getElementById('stat-sites');
+        if (el) el.textContent = Array.isArray(sites) ? sites.length : '—';
     } catch {
-        document.getElementById('stat-sites').textContent = '—';
+        const el = document.getElementById('stat-sites');
+        if (el) el.textContent = '—';
     }
 
     try {
-        const res = await fetch('/api/hazards');
-        const hazards = await res.json();
-        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const resolved = hazards.filter(h => h.status === 'Verified' && new Date(h.verifiedAt) >= oneDayAgo).length;
-        document.getElementById('stat-resolved').textContent = resolved;
-        document.getElementById('stat-active').textContent = hazards.length;
+        const res      = await fetch('/api/hazards');
+        const hazards  = await res.json();
+        const oneDayAgo = new Date(Date.now() - 86400000);
+        const resolved  = hazards.filter(h => h.status === 'Verified' && new Date(h.verifiedAt) >= oneDayAgo).length;
+        const elRes  = document.getElementById('stat-resolved');
+        const elAct  = document.getElementById('stat-active');
+        if (elRes) elRes.textContent = resolved;
+        if (elAct) elAct.textContent = hazards.length;
     } catch {
-        document.getElementById('stat-resolved').textContent = '—';
-        document.getElementById('stat-active').textContent = '—';
+        const elRes = document.getElementById('stat-resolved');
+        const elAct = document.getElementById('stat-active');
+        if (elRes) elRes.textContent = '—';
+        if (elAct) elAct.textContent = '—';
     }
 }
 
 export function deleteHazard(id) {
-    if (!currentUser || currentUser.role !== 'Admin') {
+    if (currentUser?.role !== 'Admin') {
         showToast('Only admins can delete reports.', 'error');
         return;
     }
@@ -384,19 +369,13 @@ export function deleteHazard(id) {
 }
 
 export function refreshCurrentTabData() {
-    if (currentTab === 'reports') {
-        fetchReports();
-    } else if (currentTab === 'heritage') {
-        fetchHeritageSites();
-    } else if (currentTab === 'risk') {
+    if (currentTab === 'reports')  fetchReports();
+    else if (currentTab === 'heritage') fetchHeritageSites();
+    else if (currentTab === 'risk') {
         loadRiskMappingData();
-        import('./charts.js').then(module => {
-            module.loadSeverityDistribution();
-            module.syncTrendsWithMongo();
-        });
+        import('./charts.js').then(m => { m.loadSeverityDistribution(); m.syncTrendsWithMongo(); });
     } else if (currentTab === 'center') {
         loadCenterStats();
         loadFlaggedSites();
     }
 }
-

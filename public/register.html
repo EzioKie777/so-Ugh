@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+    register.html  —  Tagbi GeoGuard (Fixed)
+    Change: Removed Admin role from self-registration dropdown.
+            All new accounts are GeoGuard by default.
+            Admins must be promoted directly in the database.
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,17 +22,13 @@
         .header-logo { width: 50px; height: auto; }
         .header-text-block h2 { margin: 0; font-size: 24px; color: #2c3e50; }
         .header-text-block p { margin: 0; font-size: 14px; color: #7f8c8d; }
-        
-        /* Message Area */
         #statusMsg { margin-bottom: 15px; font-size: 13px; text-align: center; display: none; font-weight: 600; }
-        
         form { display: flex; flex-direction: column; gap: 12px; }
         input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--primary); }
         .action-btn { background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .action-btn:hover { background-color: var(--primary-hover); }
         .action-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        
         .footer-links { margin-top: 20px; text-align: center; font-size: 13px; color: #555; }
         .footer-links a { color: var(--primary); text-decoration: none; font-weight: bold; }
         @media (max-width: 768px) { .login-card { flex-direction: column; max-width: 400px; } .card-left { display: none; } }
@@ -52,10 +54,10 @@
                 <form id="registerForm">
                     <input type="text" id="username" placeholder="Choose Username" required>
                     <input type="password" id="password" placeholder="Create Password" required>
-                    <select id="role" style="padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; width: 100%; margin-bottom: 12px;">
-                        <option value="GeoGuard">GeoGuard (Regular User)</option>
-                        <option value="Admin">Admin</option>
-                    </select>
+                    <!--
+                        Role selection removed — all self-registered users are GeoGuard.
+                        To promote a user to Admin, update their role directly in MongoDB Atlas.
+                    -->
                     <button type="submit" class="action-btn" id="regBtn">CREATE ACCOUNT</button>
                 </form>
                 <div class="footer-links">
@@ -69,47 +71,41 @@
         const statusMsg = document.getElementById('statusMsg');
 
         function showMessage(text, isError = false) {
-            statusMsg.innerText = text;
-            statusMsg.style.display = 'block';
-            statusMsg.style.color = isError ? 'var(--error)' : 'var(--success)';
+            statusMsg.innerText       = text;
+            statusMsg.style.display   = 'block';
+            statusMsg.style.color     = isError ? 'var(--error)' : 'var(--success)';
         }
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('regBtn');
-            
-            // UI State Reset
             statusMsg.style.display = 'none';
-            btn.innerText = "Registering...";
-            btn.disabled = true;
+            btn.innerText = 'Registering...';
+            btn.disabled  = true;
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
 
             try {
-                const res = await fetch('/api/signup', {
-                    method: 'POST',
+                const res  = await fetch('/api/signup', {
+                    method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, role })
+                    body:    JSON.stringify({ username, password })
                 });
-                
                 const data = await res.json();
 
                 if (res.ok) {
-                    showMessage("Account created! Redirecting to login...", false);
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000); // 2 second delay so they can read the success message
+                    showMessage('Account created! Redirecting to login...', false);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 } else {
-                    showMessage(data.message || "Registration failed.", true);
-                    btn.disabled = false;
-                    btn.innerText = "CREATE ACCOUNT";
+                    showMessage(data.message || 'Registration failed.', true);
+                    btn.disabled  = false;
+                    btn.innerText = 'CREATE ACCOUNT';
                 }
-            } catch (err) { 
-                showMessage("Connection error. Is the server running?", true); 
-                btn.disabled = false;
-                btn.innerText = "CREATE ACCOUNT";
+            } catch {
+                showMessage('Connection error. Is the server running?', true);
+                btn.disabled  = false;
+                btn.innerText = 'CREATE ACCOUNT';
             }
         });
     </script>
