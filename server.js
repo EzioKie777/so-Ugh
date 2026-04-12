@@ -17,8 +17,114 @@ const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) { console.error('❌  MONGO_URI not set.'); process.exit(1); }
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅  Connected to MongoDB Atlas!'))
+    .then(async () => {
+        console.log('✅  Connected to MongoDB Atlas!');
+        await seedVerifiedHazards();
+    })
     .catch(err => { console.error('❌  MongoDB error:', err); process.exit(1); });
+
+// ── Permanent Verified Seed Data ──────────────────────────
+async function seedVerifiedHazards() {
+    const verifiedCount = await Hazard.countDocuments({ status: 'Verified' });
+    if (verifiedCount > 0) return;
+
+    const sites = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'tagbilaran-heritages.json'), 'utf8'));
+    const getFlaggedSites = (lat, lng, radiusKm) => sites
+        .filter(s => s.coordinates?.lat && s.coordinates?.lng)
+        .map(s => ({ site: s, dist: haversineDistance(lat, lng, s.coordinates.lat, s.coordinates.lng) }))
+        .filter(({ dist }) => dist <= radiusKm)
+        .map(({ site, dist }) => ({ name: site.name, address: site.location?.address || '', distance: Math.round(dist * 1000), status: 'Unreviewed' }));
+
+    const verifiedHazards = [
+        {
+            title: '2026 Rain Flooding at Plaza Rizal',
+            type: 'Flood',
+            severity: 'Moderate',
+            description: 'Heavy monsoon rains caused street flooding and water intrusion around Plaza Rizal, forcing temporary closures of nearby heritage walkways.',
+            incidentDate: new Date('2026-03-18T09:15:00Z'),
+            location: { address: 'Plaza Rizal, Poblacion II, Tagbilaran City', lat: 9.6435, lng: 123.8544, heritageSite: 'Plaza Rizal' },
+            radius: 1.2,
+            flaggedSites: [],
+            impact: { casualties: 0, damageEstimate: 850000 },
+            reporter: { name: 'Tagbilaran City DRRM Office', contact: '032-123-4567' },
+            status: 'Verified',
+            verifiedBy: 'Tagbilaran GeoGuard',
+            verifiedAt: new Date('2026-03-18T12:30:00Z'),
+            timestamp: new Date('2026-03-18T09:15:00Z')
+        },
+        {
+            title: '2025 Heritage House Fire in Sitio Ubos',
+            type: 'Fire',
+            severity: 'Critical',
+            description: 'A fire incident near Casa Rocha-Suarez Heritage House damaged nearby ancestral structures and triggered an emergency heritage protection response.',
+            incidentDate: new Date('2025-11-12T21:45:00Z'),
+            location: { address: 'Sitio Ubos, Poblacion I, Tagbilaran City', lat: 9.64243, lng: 123.85218, heritageSite: 'Casa Rocha-Suarez Heritage House' },
+            radius: 0.8,
+            flaggedSites: [],
+            impact: { casualties: 0, damageEstimate: 3200000 },
+            reporter: { name: 'Tagbilaran City Fire Department', contact: '032-234-5678' },
+            status: 'Verified',
+            verifiedBy: 'Tagbilaran GeoGuard',
+            verifiedAt: new Date('2025-11-13T02:00:00Z'),
+            timestamp: new Date('2025-11-12T21:45:00Z')
+        },
+        {
+            title: '2025 Seismic Shake Near Cathedral',
+            type: 'Earthquake',
+            severity: 'Moderate',
+            description: 'Tremors affecting the Cathedral of St. Joseph the Worker prompted heritage assessments and temporary perimeter closures around the structure.',
+            incidentDate: new Date('2025-12-05T04:20:00Z'),
+            location: { address: 'Carlos P. Garcia Avenue, Poblacion II, Tagbilaran City', lat: 9.64325, lng: 123.85435, heritageSite: 'Cathedral of St. Joseph the Worker' },
+            radius: 2.0,
+            flaggedSites: [],
+            impact: { casualties: 0, damageEstimate: 1150000 },
+            reporter: { name: 'Philippine Institute of Volcanology', contact: '032-345-6789' },
+            status: 'Verified',
+            verifiedBy: 'Tagbilaran GeoGuard',
+            verifiedAt: new Date('2025-12-05T08:00:00Z'),
+            timestamp: new Date('2025-12-05T04:20:00Z')
+        },
+        {
+            title: '2026 Water Main Break Near National Museum',
+            type: 'Other',
+            severity: 'Low',
+            description: 'A main water pipe failure flooded streets near the National Museum and required urgent heritage site protection measures to prevent interior damage.',
+            incidentDate: new Date('2026-01-22T15:10:00Z'),
+            location: { address: 'Carlos P. Garcia Avenue, Poblacion II, Tagbilaran City', lat: 9.6439, lng: 123.8547, heritageSite: 'National Museum of the Philippines – Bohol' },
+            radius: 0.6,
+            flaggedSites: [],
+            impact: { casualties: 0, damageEstimate: 520000 },
+            reporter: { name: 'Tagbilaran Public Works', contact: '032-456-7890' },
+            status: 'Verified',
+            verifiedBy: 'Tagbilaran GeoGuard',
+            verifiedAt: new Date('2026-01-22T17:30:00Z'),
+            timestamp: new Date('2026-01-22T15:10:00Z')
+        },
+        {
+            title: '2025 Flash Floods in Barangay Tiptip',
+            type: 'Flood',
+            severity: 'Critical',
+            description: 'Intense flash flooding in Barangay Tiptip threatened nearby heritage corridors and required emergency road closures and heritage asset monitoring.',
+            incidentDate: new Date('2025-10-08T18:00:00Z'),
+            location: { address: 'Barangay Tiptip, Tagbilaran City', lat: 9.6939, lng: 123.8683, heritageSite: 'Plaza Rizal' },
+            radius: 2.4,
+            flaggedSites: [],
+            impact: { casualties: 0, damageEstimate: 2800000 },
+            reporter: { name: 'Tagbilaran Environment Office', contact: '032-567-8901' },
+            status: 'Verified',
+            verifiedBy: 'Tagbilaran GeoGuard',
+            verifiedAt: new Date('2025-10-08T20:15:00Z'),
+            timestamp: new Date('2025-10-08T18:00:00Z')
+        }
+    ];
+
+    for (const hazard of verifiedHazards) {
+        hazard.flaggedSites = getFlaggedSites(hazard.location.lat, hazard.location.lng, hazard.radius || 1);
+    }
+
+    await Hazard.insertMany(verifiedHazards);
+    console.log('✅  Seeded permanent verified Tagbilaran hazard reports.');
+}
 
 // ── Schemas ───────────────────────────────────────────────
 const userSchema = new mongoose.Schema({
