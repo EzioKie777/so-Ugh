@@ -90,6 +90,15 @@
     .modal-field label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-grey); display:block; margin-bottom:4px; }
     .modal-field p { margin:0; font-size:14px; color:var(--text-dark); }
 
+    /* Toast notification */
+    .toast { position: fixed; top: 20px; right: 20px; background: var(--text-dark); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; font-size: 14px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    /* Sidebar footer */
+    .sidebar-footer { padding: 20px 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -464,9 +473,12 @@
         </div>
     </main>
     
+    <div id="toast" class="toast"></div>
+    
     <script>
         let currentTab = 'center'; // Track current active tab
         let currentUser = null; // Store current user data
+        let allReports = [];
 
         // Tab Switching Logic
         function switchTab(viewId, el) {
@@ -500,21 +512,67 @@
             fullReportForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
+                const title = document.getElementById('fTitle').value.trim();
                 const hazardType = document.getElementById('fType').value;
+                const severity = document.getElementById('fSeverity').value;
+                const description = document.getElementById('fDesc').value.trim();
+                const incidentDate = document.getElementById('fDate').value;
+                const barangay = document.getElementById('fBarangay').value;
+                const city = document.getElementById('fCity').value;
+                const lat = parseFloat(document.getElementById('fLat').value);
+                const lng = parseFloat(document.getElementById('fLng').value);
+
+                // Validation
+                if (!title) {
+                    alert('Please enter a title for the hazard report.');
+                    document.getElementById('fTitle').focus();
+                    return;
+                }
+                if (!hazardType) {
+                    alert('Please select a hazard type.');
+                    document.getElementById('fType').focus();
+                    return;
+                }
+                if (!severity) {
+                    alert('Please select a severity level.');
+                    document.getElementById('fSeverity').focus();
+                    return;
+                }
+                if (!description) {
+                    alert('Please provide a description.');
+                    document.getElementById('fDesc').focus();
+                    return;
+                }
+                if (!incidentDate) {
+                    alert('Please select an incident date.');
+                    document.getElementById('fDate').focus();
+                    return;
+                }
+                if (!barangay || !city) {
+                    alert('Please select a barangay and city.');
+                    if (!barangay) document.getElementById('fBarangay').focus();
+                    else document.getElementById('fCity').focus();
+                    return;
+                }
+                if (hazardType !== 'Flood' && (!lat || !lng)) {
+                    alert('Please drop a pin on the map to mark the hazard location.');
+                    return;
+                }
+                
                 const radiusValue = hazardType === 'Fire' ? 0.5 :
                     hazardType === 'Flood' ? null :
                     parseFloat(document.getElementById('fRadius').value) || 1;
 
                 const payload = {
-                    title: document.getElementById('fTitle').value,
+                    title,
                     type: hazardType,
-                    severity: document.getElementById('fSeverity').value,
-                    description: document.getElementById('fDesc').value,
-                    incidentDate: document.getElementById('fDate').value,
+                    severity,
+                    description,
+                    incidentDate,
                     location: {
-                        address: `${document.getElementById('fBarangay').value}, ${document.getElementById('fCity').value}, Bohol`,
-                        lat: parseFloat(document.getElementById('fLat').value) || null,
-                        lng: parseFloat(document.getElementById('fLng').value) || null,
+                        address: `${barangay}, ${city}, Bohol`,
+                        lat: lat || null,
+                        lng: lng || null,
                     },
                     radius: radiusValue,
                     timestamp: new Date().toISOString()
@@ -546,63 +604,98 @@
             });
         }
 
+        function renderReports(reports) {
+            const tbody = document.getElementById('rt-body');
+            if(!reports.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = reports.map(h => `
+                <tr>
+                    <td>
+                        <strong>${h.title || 'Untitled Report'}</strong><br>
+                        <small style="color:var(--text-grey)">${h.location?.address || 'No address provided'}</small>
+                        ${h.flaggedSites?.length ? 
+                            `<br><span style="font-size:11px; font-weight:700; color:var(--danger);">
+                                ⚠️ ${h.flaggedSites.length} heritage site${h.flaggedSites.length > 1 ? 's' : ''} at risk
+                            </span>` : ''}
+                    </td>
+                    <td>${h.type || 'Other'}</td>
+                    <td>
+                        <span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">
+                            ${h.severity || 'Moderate'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">
+                            ${h.status || 'Pending'}
+                        </span>
+                    </td>
+                    <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
+                    <td style="display:flex; gap:10px; align-items:center;">
+                        <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
+                        View Details
+                        </button>
+                        ${currentUser && currentUser.role === 'Admin' && h.status === 'Pending' ? 
+                        `<button onclick="verifyHazard('${h._id}')" style="background:none; border:none; color:var(--success); cursor:pointer; font-weight:700;">
+                        Verify
+                        </button>` : ''}
+                        ${currentUser && currentUser.role === 'Admin' ? 
+                        `<button onclick="deleteHazard('${h._id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:700;">
+                        Delete
+                        </button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         async function fetchReports() {
             try {
                 const res = await fetch('/api/hazards');
                 const data = await res.json();
                 
-                const tbody = document.getElementById('rt-body');
+                allReports = data;
                 const statActive = document.getElementById('stat-active');
                 
                 // Update the "Active Hazards" counter
                 statActive.innerText = data.length;
                 
-                if(!data.length) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#999;">No active hazards reported.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = data.map(h => `
-                    <tr>
-                        <td>
-                            <strong>${h.title || 'Untitled Report'}</strong><br>
-                            <small style="color:var(--text-grey)">${h.location?.address || 'No address provided'}</small>
-                            ${h.flaggedSites?.length ? 
-                                `<br><span style="font-size:11px; font-weight:700; color:var(--danger);">
-                                    ⚠️ ${h.flaggedSites.length} heritage site${h.flaggedSites.length > 1 ? 's' : ''} at risk
-                                </span>` : ''}
-                        </td>
-                        <td>${h.type || 'Other'}</td>
-                        <td>
-                            <span class="badge badge-${(h.severity || 'moderate').toLowerCase()}">
-                                ${h.severity || 'Moderate'}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge ${h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate'}">
-                                ${h.status || 'Pending'}
-                            </span>
-                        </td>
-                        <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
-                        <td style="display:flex; gap:10px; align-items:center;">
-                            <button onclick="viewHazard('${h._id}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:700;">
-                            View Details
-                            </button>
-                            ${currentUser && currentUser.role === 'Admin' && h.status === 'Pending' ? 
-                            `<button onclick="verifyHazard('${h._id}')" style="background:none; border:none; color:var(--success); cursor:pointer; font-weight:700;">
-                            Verify
-                            </button>` : ''}
-                            ${currentUser && currentUser.role === 'Admin' ? 
-                            `<button onclick="deleteHazard('${h._id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:700;">
-                            Delete
-                            </button>` : ''}
-                        </td>
-                    </tr>
-                `).join('');
+                renderReports(allReports);
             } catch (err) {
                 console.error("Fetch error:", err);
                 document.getElementById('rt-body').innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">Failed to load reports from server.</td></tr>';
             }
+        }
+
+        function filterReports() {
+            const searchInput = document.querySelector('.search-in');
+            const typeSelect = document.querySelector('.filter-bar select');
+            if (!searchInput || !typeSelect) return;
+            
+            const search = searchInput.value.toLowerCase();
+            const type = typeSelect.value;
+            
+            let filtered = allReports;
+            if (type !== 'All Types') {
+                filtered = filtered.filter(h => h.type === type);
+            }
+            if (search) {
+                filtered = filtered.filter(h => 
+                    (h.title || '').toLowerCase().includes(search) || 
+                    (h.location?.address || '').toLowerCase().includes(search)
+                );
+            }
+            renderReports(filtered);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
 
@@ -725,7 +818,8 @@
                     return;
                 }
 
-                new Chart(ctx, {
+                if (severityChart) severityChart.destroy();
+                severityChart = new Chart(ctx, {
                     type: 'pie',
                     data: {
                         labels,
@@ -790,6 +884,10 @@
             loadFlaggedSites();
             // Start polling for real-time updates every 30 seconds
             setInterval(refreshCurrentTabData, 30000);
+
+            // Add filter event listeners
+            document.querySelector('.search-in').addEventListener('input', filterReports);
+            document.querySelector('.filter-bar select').addEventListener('change', filterReports);
         };
 
         // Function to refresh data for the currently active tab
@@ -806,11 +904,6 @@
                 loadCenterStats();
                 loadFlaggedSites();
             }
-
-            // Center tab has stat-active updated via fetchReports, but since it's always visible, maybe update it too
-            if (currentTab !== 'reports') {
-                fetchReports(); // To update the stat-active in center
-            }            
         }
 
         function updateRadiusControl() {
@@ -959,14 +1052,14 @@
                 });
                 
                 if (res.ok) {
-                    alert('Report verified successfully!');
+                    showToast('Report verified successfully!', 'success');
                     fetchReports(); // Refresh the reports list
                 } else {
                     const err = await res.json();
-                    alert('Error verifying report: ' + err.message);
+                    showToast('Error verifying report: ' + err.message, 'error');
                 }
             } catch (err) {
-                alert('Server connection failed. Please try again.');
+                showToast('Server connection failed. Please try again.', 'error');
             }
         }
 
@@ -1023,8 +1116,10 @@
                     new Date(h.verifiedAt) >= oneDayAgo
                 ).length;
                 document.getElementById('stat-resolved').textContent = resolved;
+                document.getElementById('stat-active').textContent = hazards.length;
             } catch {
                 document.getElementById('stat-resolved').textContent = '—';
+                document.getElementById('stat-active').textContent = '—';
             }
         }
 
@@ -1032,7 +1127,7 @@
 
         function deleteHazard(id) {
             if (!currentUser || currentUser.role !== 'Admin') {
-                alert('Only admins can delete reports.');
+                showToast('Only admins can delete reports.', 'error');
                 return;
             }
             pendingDeleteId = id;
@@ -1056,10 +1151,10 @@
                     loadCenterStats();
                 } else {
                     const err = await res.json();
-                    alert('Error deleting report: ' + err.message);
+                    showToast('Error deleting report: ' + err.message, 'error');
                 }
             } catch (err) {
-                alert('Server connection failed. Please try again.');
+                showToast('Server connection failed. Please try again.', 'error');
             }
         });
 
@@ -1162,7 +1257,7 @@
 
                 // Blue markers for hazard report locations
                 hazards.forEach(h => {
-                    if (!h.location?.lat || !h.location?.lng) return;
+                    if (!h.location?.lat || !h.location?.lng || h.type === 'Flood') return;
                     const icon = L.divIcon({
                         className: '',
                         html: `<div style="width:10px; height:10px; border-radius:50%; background:#3b82f6; border:2px solid rgba(255,255,255,0.6); box-shadow:0 0 8px #3b82f6aa;"></div>`,
@@ -1221,6 +1316,7 @@
         let reportMap = null;
         let reportPin = null;
         let radiusCircle = null;
+        let severityChart = null;
 
         function initReportMap() {
             if (reportMap) {
