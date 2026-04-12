@@ -219,24 +219,51 @@ export async function acknowledgeFlaggedSite(hazardId, siteName, status) {
 
 export async function loadRiskMappingData() {
     try {
-        const response = await fetch('/api/analytics');
-        const { topSites } = await response.json();
+        const response = await fetch('/api/flagged-sites');
+        const flaggedSites = await response.json();
         const listEl = document.getElementById('vulnerable-sites-list');
         if (!listEl) return;
 
-        if (!topSites || topSites.length === 0) {
-            listEl.innerHTML = '<p class="empty-state">No vulnerable sites identified in the last 30 days.</p>';
+        if (!flaggedSites || flaggedSites.length === 0) {
+            listEl.innerHTML = '<p class="empty-state">No heritage sites currently flagged by hazard reports.</p>';
             return;
         }
 
+        // Aggregate sites by name and count occurrences
+        const siteAggregation = {};
+        flaggedSites.forEach(f => {
+            const key = f.siteName;
+            if (!siteAggregation[key]) {
+                siteAggregation[key] = {
+                    siteName: f.siteName,
+                    siteAddress: f.siteAddress,
+                    count: 0,
+                    highestSeverity: 'Low'
+                };
+            }
+            siteAggregation[key].count++;
+            
+            // Track highest severity seen for this site
+            const severities = ['Low', 'Moderate', 'Critical'];
+            const currentIdx = severities.indexOf(siteAggregation[key].highestSeverity);
+            const newIdx = severities.indexOf(f.hazardSeverity || 'Moderate');
+            if (newIdx > currentIdx) {
+                siteAggregation[key].highestSeverity = f.hazardSeverity || 'Moderate';
+            }
+        });
+
+        // Convert to array and sort by count descending
+        const topSites = Object.values(siteAggregation).sort((a, b) => b.count - a.count);
+
         listEl.innerHTML = topSites.map((site, index) => {
             const markerColor = site.count > 5 ? '#ef4444' : site.count > 2 ? '#f59e0b' : '#10b981';
-            const severityLabel = site.count > 5 ? 'HIGH RISK' : site.count > 2 ? 'MEDIUM' : 'LOW';
+            const severityLabel = site.count > 5 ? 'CRITICAL' : site.count > 2 ? 'HIGH' : 'MEDIUM';
             return `
                 <div class="vulnerable-row">
                     <div>
-                        <div class="vulnerable-name">#${index + 1} ${site._id || 'Unknown Location'}</div>
-                        <div class="vulnerable-meta">${site.count} recent reports</div>
+                        <div class="vulnerable-name">#${index + 1} ${site.siteName}</div>
+                        <div class="vulnerable-meta">${site.siteAddress}</div>
+                        <div class="vulnerable-meta" style="color: var(--accent); margin-top: 4px; font-weight: 600;">${site.count} hazard report${site.count !== 1 ? 's' : ''} flagging this site</div>
                     </div>
                     <div class="risk-pill" style="background:${markerColor};">${severityLabel}</div>
                 </div>`;

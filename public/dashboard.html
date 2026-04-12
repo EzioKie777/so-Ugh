@@ -306,7 +306,15 @@
             </div>
 
             <div class="form-card">
-                <h3>Hazard Trends (Last 7 Days)</h3>
+                <div class="trends-header">
+                    <h3>Hazard Trends</h3>
+                    <select id="trends-filter" class="trends-filter" onchange="syncTrendsWithMongo(this.value)">
+                        <option value="24h">Last 24 Hours</option>
+                        <option value="7d" selected>Last 7 Days</option>
+                        <option value="30d">Last Month</option>
+                        <option value="365d">Last Year</option>
+                    </select>
+                </div>
                 <div id="trends-chart"></div>
             </div>
             <div class="form-card">

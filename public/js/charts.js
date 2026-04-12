@@ -1,11 +1,11 @@
 let severityChart = null;
 
-export async function syncTrendsWithMongo() {
+export async function syncTrendsWithMongo(timePeriod = '7d') {
     const chart = document.getElementById('trends-chart');
     if (!chart) return;
 
     try {
-        const response = await fetch('/api/analytics');
+        const response = await fetch(`/api/analytics?period=${timePeriod}`);
         const { trends } = await response.json();
         chart.innerHTML = '';
 

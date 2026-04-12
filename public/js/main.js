@@ -38,6 +38,8 @@ window.deleteHazard = deleteHazard;
 window.closeModal = closeModal;
 window.closeDeleteModal = closeDeleteModal;
 window.acknowledgeFlaggedSite = acknowledgeFlaggedSite;
+window.loadRiskMappingData = loadRiskMappingData;
+window.syncTrendsWithMongo = syncTrendsWithMongo;
 
 window.addEventListener('DOMContentLoaded', async () => {
     const userData = localStorage.getItem('user');
@@ -63,6 +65,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     fetchReports();
     fetchHeritageSites();
     loadFlaggedSites();
+    loadRiskMappingData();
     setInterval(refreshCurrentTabData, 30000);
 
     document.querySelector('.search-in')?.addEventListener('input', filterReports);
