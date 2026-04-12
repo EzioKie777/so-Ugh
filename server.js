@@ -349,13 +349,13 @@ app.get('/api/analytics', requireAuth, async (req, res) => {
             Hazard.countDocuments(),
             Hazard.aggregate([{ $group: { _id: '$severity', count: { $sum: 1 } } }]),
             Hazard.aggregate([
-                { $match: { timestamp: { $gte: thirtyAgo } } },
+                { $match: { incidentDate: { $gte: thirtyAgo } } },
                 { $group: { _id: '$location.heritageSite', count: { $sum: 1 } } },
                 { $sort: { count: -1 } }, { $limit: 5 }
             ]),
             Hazard.aggregate([
-                { $match: { timestamp: { $gte: sinceDate } } },
-                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } }, count: { $sum: 1 } } },
+                { $match: { incidentDate: { $gte: sinceDate } } },
+                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$incidentDate' } }, count: { $sum: 1 } } },
                 { $sort: { _id: 1 } }
             ])
         ]);
