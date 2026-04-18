@@ -255,6 +255,22 @@ app.post('/api/login', async (req, res) => {
     } catch { res.status(500).json({ success: false, message: 'Server error during login.' }); }
 });
 
+app.patch('/api/admin/promote', requireAdmin, async (req, res) => {
+    try {
+        const { username } = req.body;
+        if (!username) return res.status(400).json({ message: 'Username is required.' });
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ message: 'Account not found.' });
+        if (user.role === 'Admin') return res.status(200).json({ message: 'Account is already an admin.' });
+        user.role = 'Admin';
+        await user.save();
+        res.json({ message: `Account ${username} has been promoted to Admin.` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error promoting account.' });
+    }
+});
+
 // ── Heritage Health Route ─────────────────────────────────
 // Returns computed health for every site that has active hazards.
 // Sites with zero hazards = Excellent (handled client-side as default).

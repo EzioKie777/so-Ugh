@@ -254,8 +254,13 @@ export async function loadUserProfileStats() {
     const roleEl = document.getElementById('profile-role');
     const totalEl = document.getElementById('profile-total-reported');
     const verifiedEl = document.getElementById('profile-verified-reported');
+    const adminSection = document.getElementById('profile-admin-settings');
+    const adminMessage = document.getElementById('admin-promo-message');
+
     if (nameEl) nameEl.textContent = currentUser?.username || 'Unknown';
     if (roleEl) roleEl.textContent = currentUser?.role === 'Admin' ? 'Administrator' : 'GeoGuard Officer';
+    if (adminSection) adminSection.style.display = currentUser?.role === 'Admin' ? 'block' : 'none';
+    if (adminMessage) adminMessage.textContent = '';
     if (!currentUser) return;
 
     try {
@@ -267,6 +272,39 @@ export async function loadUserProfileStats() {
         console.error('Error loading profile stats:', err);
         if (totalEl) totalEl.textContent = '—';
         if (verifiedEl) verifiedEl.textContent = '—';
+    }
+}
+
+export async function promoteUserToAdmin() {
+    const input = document.getElementById('admin-account-name');
+    const message = document.getElementById('admin-promo-message');
+    if (!input || !message) return;
+
+    const username = input.value.trim();
+    if (!username) {
+        message.textContent = 'Please enter a username to promote.';
+        message.style.color = 'var(--danger)';
+        return;
+    }
+
+    try {
+        const res = await window.authFetch('/api/admin/promote', {
+            method: 'PATCH',
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            message.textContent = data.message || 'Failed to promote account.';
+            message.style.color = 'var(--danger)';
+            return;
+        }
+        message.textContent = data.message || `Account ${username} has been promoted.`;
+        message.style.color = 'var(--success)';
+        input.value = '';
+    } catch (err) {
+        console.error('Admin promotion error:', err);
+        message.textContent = 'Server error while promoting account.';
+        message.style.color = 'var(--danger)';
     }
 }
 

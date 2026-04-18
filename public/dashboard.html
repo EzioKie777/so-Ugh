@@ -354,6 +354,15 @@
                     <h2 id="profile-verified-reported" class="stat-value">—</h2>
                 </div>
             </div>
+            <div id="profile-admin-settings" class="form-card admin-settings" style="display:none;">
+                <div class="card-title">Admin Settings</div>
+                <div class="form-group">
+                    <label>Account to promote</label>
+                    <input type="text" id="admin-account-name" placeholder="Enter username to promote">
+                </div>
+                <button class="btn btn-submit" onclick="promoteUserToAdmin()">Promote to Admin</button>
+                <p id="admin-promo-message" class="profile-note" style="margin-top: 12px; color: var(--text-grey);"></p>
+            </div>
         </section>
         <div class="modal-overlay" id="hazard-modal">
             <div class="modal-box">

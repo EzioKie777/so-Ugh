@@ -21,7 +21,8 @@ import {
     setCurrentUser,
     refreshCurrentTabData,
     confirmDeleteHazard,
-    loadRiskMappingData
+    loadRiskMappingData,
+    promoteUserToAdmin
 } from './dashboard.js';
 
 import {
@@ -57,6 +58,7 @@ window.closeDeleteModal       = closeDeleteModal;
 window.acknowledgeFlaggedSite = acknowledgeFlaggedSite;
 window.loadRiskMappingData    = loadRiskMappingData;
 window.syncTrendsWithMongo    = syncTrendsWithMongo;
+window.promoteUserToAdmin      = promoteUserToAdmin;
 
 // ── Bootstrap ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
