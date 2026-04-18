@@ -42,9 +42,12 @@
             <div id="btn-risk-mapping" class="nav-item" onclick="switchTab('risk', this)">
                 <span class="icon">📈</span> Risk Mapping
             </div>
+            <div id="btn-profile" class="nav-item" onclick="switchTab('profile', this)">
+                <span class="icon">👤</span> Profile
+            </div>
         </nav>
         <div class="sidebar-footer">
-            <div class="sidebar-user">
+            <div class="sidebar-user" onclick="switchTab('profile', document.getElementById('btn-profile'))" title="View profile">
                 <div class="sidebar-avatar" id="user-avatar">??</div>
                 <div>
                     <div class="sidebar-user-name" id="user-display-name">Loading...</div>
@@ -326,6 +329,29 @@
                 <div class="form-card">
                     <h3>Top Vulnerable Sites</h3>
                     <div id="vulnerable-sites-list">Loading...</div>
+                </div>
+            </div>
+        </section>
+        <section id="view-profile" class="view-section">
+            <div class="view-header">
+                <h1>Profile</h1>
+                <p>Summary of your account activity and hazard reporting performance.</p>
+            </div>
+            <div class="form-card">
+                <div class="card-title">User Information</div>
+                <div class="profile-info">
+                    <div class="profile-row"><span>Name</span><strong id="profile-name">—</strong></div>
+                    <div class="profile-row"><span>Role</span><strong id="profile-role">—</strong></div>
+                </div>
+            </div>
+            <div class="stats-grid profile-stats">
+                <div class="form-card card-no-margin">
+                    <p class="small-caption">Hazards Reported</p>
+                    <h2 id="profile-total-reported" class="stat-value">—</h2>
+                </div>
+                <div class="form-card card-no-margin">
+                    <p class="small-caption">Verified Reports</p>
+                    <h2 id="profile-verified-reported" class="stat-value">—</h2>
                 </div>
             </div>
         </section>

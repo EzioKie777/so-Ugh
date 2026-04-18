@@ -266,7 +266,10 @@ app.get('/api/heritage-health', requireAuth, async (req, res) => {
 // ── Hazard Routes ─────────────────────────────────────────
 app.post('/api/report-hazard', requireAuth, async (req, res) => {
     try {
-        const newHazard = new Hazard(req.body);
+        const newHazard = new Hazard({
+            ...req.body,
+            reporter: { name: req.user.username, contact: req.user.username }
+        });
         if (newHazard.location?.lat && newHazard.location?.lng) {
             const sites   = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'tagbilaran-heritages.json'), 'utf8'));
             let radiusKm  = newHazard.type === 'Fire' ? 0.5 : (newHazard.radius ?? 1);

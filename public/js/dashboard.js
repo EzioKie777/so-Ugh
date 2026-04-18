@@ -19,6 +19,7 @@ export function switchTab(viewId, el) {
     if (viewId === 'reports')    fetchReports();
     if (viewId === 'heritage')   fetchHeritageSites();
     if (viewId === 'risk')       { loadRiskMappingData(); import('./charts.js').then(m => { m.loadSeverityDistribution(); m.syncTrendsWithMongo(); }); }
+    if (viewId === 'profile')    loadUserProfileStats();
     if (viewId === 'new-report') setTimeout(() => import('./map.js').then(m => m.initReportMap()), 100);
 }
 
@@ -248,6 +249,27 @@ export async function viewHazard(id) {
 export function closeModal()       { document.getElementById('hazard-modal')?.classList.remove('open'); }
 export function closeDeleteModal() { pendingDeleteId = null; document.getElementById('delete-modal')?.classList.remove('open'); }
 
+export async function loadUserProfileStats() {
+    const nameEl = document.getElementById('profile-name');
+    const roleEl = document.getElementById('profile-role');
+    const totalEl = document.getElementById('profile-total-reported');
+    const verifiedEl = document.getElementById('profile-verified-reported');
+    if (nameEl) nameEl.textContent = currentUser?.username || 'Unknown';
+    if (roleEl) roleEl.textContent = currentUser?.role === 'Admin' ? 'Administrator' : 'GeoGuard Officer';
+    if (!currentUser) return;
+
+    try {
+        const hazards = await (await fetch('/api/hazards')).json();
+        const owned = hazards.filter(h => h.reporter?.name === currentUser.username);
+        if (totalEl) totalEl.textContent = String(owned.length);
+        if (verifiedEl) verifiedEl.textContent = String(owned.filter(h => h.status === 'Verified').length);
+    } catch (err) {
+        console.error('Error loading profile stats:', err);
+        if (totalEl) totalEl.textContent = '—';
+        if (verifiedEl) verifiedEl.textContent = '—';
+    }
+}
+
 export async function confirmDeleteHazard() {
     if (!pendingDeleteId) return;
     try {
@@ -288,5 +310,6 @@ export function refreshCurrentTabData() {
     if (currentTab === 'reports')  fetchReports();
     else if (currentTab === 'heritage') fetchHeritageSites();
     else if (currentTab === 'risk')    { loadRiskMappingData(); import('./charts.js').then(m => { m.loadSeverityDistribution(); m.syncTrendsWithMongo(); }); }
+    else if (currentTab === 'profile') { loadUserProfileStats(); }
     else if (currentTab === 'center')  { loadCenterStats(); loadFlaggedSites(); }
 }
