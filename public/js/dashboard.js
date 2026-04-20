@@ -40,9 +40,11 @@ export function renderReports(reports) {
     }
     tbody.innerHTML = reports.map(h => {
         const flaggedMsg  = h.flaggedSites?.length ? `<br><span class="report-warning">⚠️ ${h.flaggedSites.length} heritage site${h.flaggedSites.length > 1 ? 's' : ''} at risk</span>` : '';
-        const statusClass = h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : 'badge-moderate';
+        const statusClass = h.status === 'Verified' ? 'badge-low' : h.status === 'Rejected' ? 'badge-critical' : h.status === 'Resolved' ? 'badge-success' : 'badge-moderate';
         const verifyBtn   = currentUser?.role === 'Admin' && h.status === 'Pending'
             ? `<button onclick="verifyHazard('${h._id}')" class="action-button action-verify">Verify</button>` : '';
+        const resolveBtn  = currentUser?.role === 'Admin' && h.status === 'Verified'
+            ? `<button onclick="resolveHazard('${h._id}')" class="action-button action-resolve">Resolve</button>` : '';
         const deleteBtn   = currentUser?.role === 'Admin'
             ? `<button onclick="deleteHazard('${h._id}')" class="action-button action-delete">Delete</button>` : '';
         return `<tr>
@@ -53,7 +55,7 @@ export function renderReports(reports) {
             <td>${new Date(h.incidentDate).toLocaleDateString()}</td>
             <td class="report-actions">
                 <button onclick="viewHazard('${h._id}')" class="action-button action-view">View Details</button>
-                ${verifyBtn}${deleteBtn}
+                ${verifyBtn}${resolveBtn}${deleteBtn}
             </td></tr>`;
     }).join('');
 }
@@ -223,6 +225,15 @@ export async function verifyHazard(hazardId) {
     try {
         const res = await window.authFetch(`/api/hazards/${hazardId}/verify`, { method: 'PUT', body: JSON.stringify({ verifiedBy: currentUser.username }) });
         if (res.ok) { showToast('Report verified!', 'success'); fetchReports(); }
+        else { const e = await res.json(); showToast('Error: ' + e.message, 'error'); }
+    } catch { showToast('Server connection failed.', 'error'); }
+}
+
+export async function resolveHazard(hazardId) {
+    if (currentUser?.role !== 'Admin') { showToast('Only admins can resolve reports.', 'error'); return; }
+    try {
+        const res = await window.authFetch(`/api/hazards/${hazardId}/resolve`, { method: 'PUT', body: JSON.stringify({ resolvedBy: currentUser.username }) });
+        if (res.ok) { showToast('Report resolved!', 'success'); fetchReports(); loadCenterStats(); }
         else { const e = await res.json(); showToast('Error: ' + e.message, 'error'); }
     } catch { showToast('Server connection failed.', 'error'); }
 }

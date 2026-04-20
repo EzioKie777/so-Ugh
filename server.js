@@ -149,9 +149,11 @@ const hazardSchema = new mongoose.Schema({
     }],
     impact:     { casualties: Number, damageEstimate: Number },
     reporter:   { name: String, contact: String },
-    status:     { type: String, default: 'Pending', enum: ['Pending', 'Verified', 'Rejected'] },
+    status:     { type: String, default: 'Pending', enum: ['Pending', 'Verified', 'Rejected', 'Resolved'] },
     verifiedBy: String,
     verifiedAt: Date,
+    resolvedBy: String,
+    resolvedAt: Date,
     timestamp:  { type: Date, default: Date.now }
 });
 const Hazard = mongoose.model('Hazard', hazardSchema);
@@ -320,6 +322,15 @@ app.put('/api/hazards/:id/verify', requireAdmin, async (req, res) => {
         if (!h) return res.status(404).json({ message: 'Hazard not found.' });
         res.json(h);
     } catch { res.status(500).json({ message: 'Error verifying hazard.' }); }
+});
+
+app.put('/api/hazards/:id/resolve', requireAdmin, async (req, res) => {
+    try {
+        const h = await Hazard.findByIdAndUpdate(req.params.id,
+            { status: 'Resolved', resolvedBy: req.user.username, resolvedAt: new Date() }, { new: true });
+        if (!h) return res.status(404).json({ message: 'Hazard not found.' });
+        res.json(h);
+    } catch { res.status(500).json({ message: 'Error resolving hazard.' }); }
 });
 
 app.delete('/api/hazards/:id', requireAdmin, async (req, res) => {
