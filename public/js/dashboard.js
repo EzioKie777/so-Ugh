@@ -246,13 +246,24 @@ export async function viewHazard(id) {
         document.getElementById('modal-title').textContent    = h.title || 'Untitled';
         document.getElementById('modal-type').textContent     = h.type  || '—';
         document.getElementById('modal-severity').innerHTML   = `<span class="badge badge-${(h.severity||'moderate').toLowerCase()}">${h.severity||'—'}</span>`;
-        document.getElementById('modal-status').innerHTML     = `<span class="badge ${h.status==='Verified'?'badge-low':h.status==='Rejected'?'badge-critical':'badge-moderate'}">${h.status||'Pending'}</span>`;
+        document.getElementById('modal-status').innerHTML     = `<span class="badge ${h.status==='Resolved'?'badge-success':h.status==='Verified'?'badge-low':h.status==='Rejected'?'badge-critical':'badge-moderate'}">${h.status||'Pending'}</span>`;
         document.getElementById('modal-date').textContent     = h.incidentDate ? new Date(h.incidentDate).toLocaleDateString() : '—';
         document.getElementById('modal-address').textContent  = h.location?.address || '—';
         const flagged = h.flaggedSites?.filter(s => s.status !== 'Cleared') || [];
         document.getElementById('modal-heritage').textContent = flagged.length ? flagged.map(s => s.name).join(', ') : 'None within hazard radius';
         document.getElementById('modal-desc').textContent     = h.description || 'No assessment provided.';
         document.getElementById('modal-submitted').textContent= h.timestamp ? new Date(h.timestamp).toLocaleString() : '—';
+        
+        // Show resolved details if report is resolved
+        const resolvedSection = document.getElementById('modal-resolved-section');
+        if (h.status === 'Resolved' && h.resolvedBy && h.resolvedAt) {
+            resolvedSection.style.display = 'block';
+            document.getElementById('modal-resolved-by').textContent = `Resolved by: ${h.resolvedBy}`;
+            document.getElementById('modal-resolved-at').textContent = `Resolved on: ${new Date(h.resolvedAt).toLocaleString()}`;
+        } else {
+            resolvedSection.style.display = 'none';
+        }
+        
         modal.classList.add('open');
     } catch { showToast('Could not load report details.', 'error'); }
 }
@@ -338,7 +349,7 @@ export async function loadCenterStats() {
     try {
         const hazards  = await (await fetch('/api/hazards')).json();
         const oneDayAgo = new Date(Date.now() - 86400000);
-        const resolved  = hazards.filter(h => h.status === 'Verified' && new Date(h.verifiedAt) >= oneDayAgo).length;
+        const resolved  = hazards.filter(h => h.status === 'Resolved' && new Date(h.resolvedAt) >= oneDayAgo).length;
         const elRes = document.getElementById('stat-resolved'), elAct = document.getElementById('stat-active');
         if (elRes) elRes.textContent = resolved;
         if (elAct) elAct.textContent = hazards.length;

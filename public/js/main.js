@@ -14,6 +14,7 @@ import {
     showToast,
     viewHazard,
     verifyHazard,
+    resolveHazard,
     deleteHazard,
     closeModal,
     closeDeleteModal,
@@ -52,6 +53,7 @@ window.updateRadiusControl    = updateRadiusControl;
 window.updateRadiusDisplay    = updateRadiusDisplay;
 window.viewHazard             = viewHazard;
 window.verifyHazard           = verifyHazard;
+window.resolveHazard          = resolveHazard;
 window.deleteHazard           = deleteHazard;
 window.closeModal             = closeModal;
 window.closeDeleteModal       = closeDeleteModal;
